@@ -112,9 +112,9 @@ function Hero() {
           className="  max-w-[350px] md:max-w-[400px] lg:max-w-[400px]"
           variants={bodyAnimation}
         >
-          <p className="z-50 text-center text-[16px] font-medium text-[#e4ded7] md:text-[20px] lg:text-left">
+          <p className="z-50 text-center text-[16px] font-semibold text-[#e4ded7] md:text-[20px] lg:text-left">
             I am a passionate software developer skilled in C++ and JavaScript,
-            currently pursuing a B.Tech at IIITDM Kurnool. .
+            currently pursuing a B.Tech at IIITDM Kurnool.
           </p>
         </motion.div>
 
@@ -123,7 +123,7 @@ function Hero() {
           variants={bodyAnimation}
         >
           <p className="text-right text-[16px] font-semibold text-[#e4ded7] md:text-[20px]">
-            I specialize in creating dynamic web applications currently
+            I specialize in creating dynamic web applications, currently
             available for work
           </p>
         </motion.div>
