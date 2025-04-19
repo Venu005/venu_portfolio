@@ -31,7 +31,11 @@ function Hero() {
 
       <div className="absolute top-10 flex justify-between sm:w-[90%] lg:max-w-[1440px]">
         <div>
-          <Link href="#" target="_blank" aria-label="View Resume">
+          <Link
+            href="https://drive.google.com/file/d/1DKr8Qdl02SjERALkwItkaP5NcXWDSz0Y/view?usp=sharing"
+            target="_blank"
+            aria-label="View Resume"
+          >
             <motion.button
               className="hidden rounded-md border-2 border-[#e4ded7] py-2 px-4 text-[14px] font-semibold text-[#e4ded7] sm:block  md:text-[16px] lg:block"
               variants={bodyAnimation}

@@ -6,6 +6,7 @@ import { blobOptions } from "@/lib/BlobConfig";
 import { useEffect } from "react";
 import Footer from "@/sections/Footer/page";
 import Contact from "@/sections/Contact/page";
+import About from "@/sections/About/page";
 
 export default function Home() {
   const blobityInstance = useBlobity(blobOptions);
@@ -26,7 +27,7 @@ export default function Home() {
       <NavBar />
       <main className="bg-black/[0.96] flex flex-col items-center justify-center ">
         <Hero />
-
+        <About />
         <Contact />
         <Footer />
       </main>
