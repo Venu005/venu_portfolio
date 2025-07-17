@@ -78,14 +78,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-3 pt-0">
-              <div className="w-full  overflow-hidden rounded-md">
+              <div className="w-full overflow-hidden rounded-md">
                 <Link href={project.deployedLink} className="cursor-pointer">
-                  <img
-                    src={imageUrl}
-                    alt={project.name}
-                    className="w-full h-full object-contain"
-                    
-                  />
+                  <div className="relative w-full h-48">
+                    <Image
+                      src={imageUrl}
+                      alt={project.name}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 768px) 100vw, 500px"
+                    />
+                  </div>
                 </Link>
               </div>
             </CardContent>
