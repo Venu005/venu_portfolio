@@ -84,6 +84,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                     src={imageUrl}
                     alt={project.name}
                     className="w-full h-full object-contain"
+                    
                   />
                 </Link>
               </div>
