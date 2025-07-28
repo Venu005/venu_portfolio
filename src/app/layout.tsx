@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Fira_Sans } from "next/font/google";
 import "./globals.css";
-
+import { Analytics } from "@vercel/analytics/next";
 const Fira = Fira_Sans({
   subsets: ["cyrillic"],
   weight: ["400", "500", "600"],
@@ -20,7 +20,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={Fira.className}>{children}</body>
+      <body className={Fira.className}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
