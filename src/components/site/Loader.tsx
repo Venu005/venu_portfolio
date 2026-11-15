@@ -36,13 +36,15 @@ export default function Loader() {
           initial={{ clipPath: "inset(0 0 0% 0)" }}
           transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
         >
-          <motion.span
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-serif text-[22vw] leading-none sm:text-[14vw]"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-          >
-            {count}
-          </motion.span>
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <motion.span
+              className="font-serif text-[22vw] leading-none tabular-nums sm:text-[14vw]"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              {count}
+            </motion.span>
+          </div>
           <span className="font-display text-xs font-extrabold uppercase tracking-wide">Loading Venusai</span>
           <span className="absolute bottom-0 left-0 h-1 bg-ink" style={{ width: `${count}%`, transition: "width .1s linear" }} />
         </motion.div>

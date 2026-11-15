@@ -1,70 +1,80 @@
 "use client";
-import { motion, useInView, useTransform, type MotionValue } from "framer-motion";
-import { useRef } from "react";
+import { animate, motion, useInView, useMotionValue, useTransform, type MotionValue } from "framer-motion";
+import { useEffect, useId, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { SIGNATURE_PATH, SIGNATURE_VIEWBOX } from "./signaturePath";
+import { SIG_FILL, SIG_PEN_WIDTH, SIG_STROKES, SIG_VIEWBOX } from "./signaturePath";
+
+// relative length of each pen stroke, so they're written one after another at a constant speed
+const lengths = SIG_STROKES.map((d) => {
+  const n = d.match(/-?\d+(\.\d+)?/g)!.map(Number);
+  let len = 0;
+  for (let i = 2; i < n.length; i += 2) len += Math.hypot(n[i] - n[i - 2], n[i + 1] - n[i - 1]);
+  return len;
+});
+const total = lengths.reduce((a, b) => a + b, 0);
+const spans = lengths.reduce<[number, number][]>((acc, l) => {
+  const start = acc.length ? acc[acc.length - 1][1] : 0;
+  acc.push([start, start + l / total]);
+  return acc;
+}, []);
 
 type Props = {
   className?: string;
-  /** "mount": draws once on load · "inView": draws when scrolled into view · "scroll": tied to `progress` */
+  /** "mount": writes once on load · "inView": writes when scrolled into view · "scroll": scrubbed by `progress` */
   mode?: "mount" | "inView" | "scroll";
   progress?: MotionValue<number>;
-  /** for mode="scroll": the part of `progress` over which it draws */
+  /** for mode="scroll": the part of `progress` over which it writes */
   range?: [number, number];
   delay?: number;
   duration?: number;
-  strokeWidth?: number;
   label?: string;
 };
 
-/** Handwritten "Venu" signature that writes itself, stroke by stroke. Colour comes from `currentColor`. */
-export default function Signature({
-  className,
-  mode = "inView",
-  progress,
-  range = [0, 1],
-  delay = 0,
-  duration = 2.2,
-  strokeWidth = 5,
-  label = "Venu's signature",
-}: Props) {
+/** Venu's signature, written stroke by stroke. Colour comes from `currentColor`. */
+export default function Signature({ className, mode = "inView", progress, range = [0, 1], delay = 0, duration = 1.8, label = "Venu's signature" }: Props) {
+  const id = useId().replace(/:/g, "");
   const ref = useRef<SVGSVGElement>(null);
   const inView = useInView(ref, { once: true, margin: "-10% 0px" });
-  const show = mode === "mount" || inView;
+  const local = useMotionValue(0);
+
+  useEffect(() => {
+    if (mode === "scroll") return;
+    if (mode === "inView" && !inView) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      local.set(1);
+      return;
+    }
+    const c = animate(local, 1, { duration, delay, ease: [0.45, 0, 0.25, 1] });
+    return () => c.stop();
+  }, [mode, inView, delay, duration, local]);
+
+  const scrolled = useTransform(progress ?? local, range, [0, 1], { clamp: true });
+  const p = mode === "scroll" && progress ? scrolled : local;
 
   return (
-    <svg ref={ref} viewBox={SIGNATURE_VIEWBOX} className={cn("block h-auto overflow-visible", className)} role="img" aria-label={label}>
-      {mode === "scroll" && progress ? (
-        <ScrollPath progress={progress} range={range} strokeWidth={strokeWidth} />
-      ) : (
-        <motion.path
-          d={SIGNATURE_PATH}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={show ? { pathLength: 1, opacity: 1 } : { pathLength: 0, opacity: 0 }}
-          transition={{
-            pathLength: { duration, ease: [0.65, 0, 0.35, 1], delay },
-            opacity: { duration: 0.01, delay },
-          }}
-        />
-      )}
+    <svg ref={ref} viewBox={SIG_VIEWBOX} className={cn("block h-auto overflow-visible", className)} role="img" aria-label={label}>
+      <defs>
+        <mask id={`sig-${id}`} maskUnits="userSpaceOnUse">
+          {SIG_STROKES.map((d, i) => (
+            <Pen key={i} d={d} progress={p} span={spans[i]} />
+          ))}
+        </mask>
+      </defs>
+      <path d={SIG_FILL} fill="currentColor" fillRule="evenodd" mask={`url(#sig-${id})`} />
     </svg>
   );
 }
 
-function ScrollPath({ progress, range, strokeWidth }: { progress: MotionValue<number>; range: [number, number]; strokeWidth: number }) {
-  const pathLength = useTransform(progress, range, [0, 1], { clamp: true });
-  const opacity = useTransform(pathLength, [0, 0.01], [0, 1]);
+function Pen({ d, progress, span }: { d: string; progress: MotionValue<number>; span: [number, number] }) {
+  const pathLength = useTransform(progress, span, [0, 1], { clamp: true });
+  const opacity = useTransform(pathLength, (v) => (v > 0.001 ? 1 : 0));
   return (
     <motion.path
-      d={SIGNATURE_PATH}
+      d={d}
       fill="none"
-      stroke="currentColor"
-      strokeWidth={strokeWidth}
+      stroke="#fff"
+      strokeWidth={SIG_PEN_WIDTH}
       strokeLinecap="round"
       strokeLinejoin="round"
       style={{ pathLength, opacity }}

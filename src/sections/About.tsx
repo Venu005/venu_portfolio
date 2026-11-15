@@ -54,13 +54,9 @@ export default function About() {
       </div>
 
       <div className="container-x relative">
-        {/* "message from" moment: the signature writes itself as you scroll */}
-        <div className="mb-12 flex flex-col items-center gap-4 text-center">
-          <div className="w-[64vw] max-w-[420px] text-lime">
-            <Signature mode="scroll" progress={scrollYProgress} range={[0.08, 0.3]} strokeWidth={4.5} />
-          </div>
+        <div className="mb-10 text-center">
           <span className="eyebrow text-cream/70">
-            <Wipe>A message from Venu</Wipe>
+            <Wipe>Software engineer since 2025</Wipe>
           </span>
         </div>
         <ScrollFill
@@ -96,7 +92,7 @@ export default function About() {
             <p className="font-serif text-4xl leading-[1.05] text-cream sm:text-5xl">
               “Ship it, learn from real users, then ship it <span className="text-lime">better</span>.”
             </p>
-            <Signature className="mt-6 w-44 text-lime" strokeWidth={6} />
+            <Signature className="mt-6 w-48 text-lime" />
           </FadeUp>
           <FadeUp delay={0.1} className="space-y-5 text-base leading-relaxed text-cream/75 sm:text-lg">
             <p>

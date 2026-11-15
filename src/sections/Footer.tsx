@@ -55,7 +55,7 @@ export default function Footer() {
 
             <div className="relative text-center">
               <div className="mx-auto mb-6 w-40 text-lime sm:w-52">
-                <Signature strokeWidth={6} />
+                <Signature />
               </div>
               <h2 className="font-display text-[13vw] font-black uppercase leading-[0.82] sm:text-[8vw] lg:text-[6.4vw]">
                 Always <span className="font-serif font-normal text-leaf">shipping</span>
