@@ -217,7 +217,7 @@ void main() {
 
   // subtle rim light on the side facing the cursor
   float rim = smoothstep(0.15, 0.6, d) * (1.0 - smoothstep(0.6, 1.0, d));
-  col += vec3(0.82, 1.0, 0.0) * rim * max(0.0, dot(normalize(vec2(0.5 - uv.x, 0.0) + 1e-4), -m)) * 0.08;
+  col += vec3(0.82, 1.0, 0.0) * rim * max(0.0, (uv.x - 0.5) * 2.0 * m.x) * 0.08;
 
   // x-ray reveal
   vec2 asp = vec2(uRes.x / uRes.y, 1.0);

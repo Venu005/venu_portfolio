@@ -6,12 +6,10 @@ import { FadeUp } from "@/components/site/Reveal";
 import { cn } from "@/lib/utils";
 
 const types = ["Web app", "AI / LLM feature", "Backend / API", "MVP", "Something else"];
-const budgets = ["< $1k", "$1k – $3k", "$3k – $8k", "$8k+", "Not sure yet"];
 
 /** Project brief form. It composes an email in the visitor's mail app, so there's no backend to maintain. */
 export default function Contact() {
   const [type, setType] = useState<string[]>([]);
-  const [budget, setBudget] = useState("");
   const [copied, setCopied] = useState(false);
 
   const toggle = (t: string) => setType((cur) => (cur.includes(t) ? cur.filter((x) => x !== t) : [...cur, t]));
@@ -27,7 +25,6 @@ export default function Contact() {
       String(f.get("message") || ""),
       ``,
       `Project type: ${type.join(", ") || "-"}`,
-      `Budget: ${budget || "-"}`,
       `Name: ${name}`,
       `Company: ${String(f.get("company") || "-")}`,
     ].join("\n");
@@ -57,7 +54,7 @@ export default function Contact() {
             </h2>
           </FadeUp>
           <FadeUp delay={0.1} className="mt-8 max-w-md space-y-6 text-cream/75">
-            <p>Tell me what you&apos;re building. I usually reply within 24 hours with questions, a rough plan and a quote.</p>
+            <p>Tell me what you&apos;re building. I usually reply within 24 hours with questions, and a rough plan.</p>
             <div className="flex flex-wrap items-center gap-3">
               <a href={`mailto:${profile.email}`} className="break-all font-serif text-2xl text-cream underline decoration-lime decoration-2 underline-offset-4 sm:text-3xl">
                 {profile.email}
@@ -84,7 +81,7 @@ export default function Contact() {
                 rel="noreferrer"
                 className="inline-flex items-center gap-1 rounded-md border border-cream/20 px-3 py-2 font-display text-xs font-extrabold uppercase text-cream transition-colors hover:border-lime hover:text-lime"
               >
-                Resume (PDF) <ArrowUpRight className="h-3.5 w-3.5" />
+                Resume <ArrowUpRight className="h-3.5 w-3.5" />
               </a>
             </div>
           </FadeUp>
@@ -98,16 +95,6 @@ export default function Contact() {
                 {types.map((t) => (
                   <Pill key={t} active={type.includes(t)} onClick={() => toggle(t)}>
                     {t}
-                  </Pill>
-                ))}
-              </div>
-            </fieldset>
-            <fieldset>
-              <legend className="eyebrow mb-3 text-cream/60">Budget</legend>
-              <div className="flex flex-wrap gap-2">
-                {budgets.map((b) => (
-                  <Pill key={b} active={budget === b} onClick={() => setBudget(budget === b ? "" : b)}>
-                    {b}
                   </Pill>
                 ))}
               </div>

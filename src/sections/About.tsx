@@ -9,7 +9,7 @@ import Signature from "@/components/site/Signature";
 type Piece = { kind: "stat"; big: string; small: string; caption: string } | { kind: "img"; src: string; caption: string };
 
 const defaultPieces: Piece[] = [
-  { kind: "stat", big: "4–6", small: "weeks to ship, vs 8 planned", caption: "ITC Agri, 2026" },
+  { kind: "stat", big: "4–6", small: "weeks to ship, vs 8 planned", caption: "Agri export platform, 2026" },
   { kind: "img", src: "/projects/project-3.png", caption: "GDG Hackathon, 2025" },
   { kind: "stat", big: "90%", small: "less manual data collation", caption: "OTIF dashboards, 2026" },
   { kind: "stat", big: "<120ms", small: "API with 2-min LLM jobs queued", caption: "Voice AI, 2025" },
@@ -80,7 +80,7 @@ export default function About() {
             <p>
               I&apos;m <strong className="text-cream">Venusai Yalamanchili</strong>, a software engineer at{" "}
               <strong className="text-cream">{profile.company}</strong>. I build products for enterprise teams and startups. Recent work
-              includes a supply chain platform for ITC Agri&apos;s spices exports, a real-time AI voice interviewer and a GitHub code review bot.
+              includes a supply chain platform for a large agri-export business, a real-time AI voice interviewer and a GitHub code review bot.
             </p>
             <p>
               I like working close to the people who use what I build. For one platform I spent 20 days on factory floors before designing a

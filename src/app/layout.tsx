@@ -25,7 +25,7 @@ const serif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://venusai.space"),
+  metadataBase: new URL("https://venu-portfolio-t3ca.vercel.app"),
   title: "Venusai Yalamanchili | Software Engineer & Freelance Developer",
   description:
     "Venusai Yalamanchili is a software engineer who builds full-stack products, AI/LLM features and real-time systems. Open to freelance projects.",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     title: "Venusai Yalamanchili | Software Engineer",
     description:
       "Full-stack, AI and real-time systems. Open to freelance work. Let's build something.",
-    url: "https://venusai.space",
+    url: "https://venu-portfolio-t3ca.vercel.app",
     siteName: "Venusai Yalamanchili",
     type: "website",
   },

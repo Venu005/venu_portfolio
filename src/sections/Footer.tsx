@@ -92,7 +92,7 @@ export default function Footer() {
                   </span>
                 </a>
                 <span className="flex items-center gap-2 text-xs text-cream/60">
-                  <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-lime" /> {time ? `${time} IST` : "IST"} · Kurnool, India
+                  <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-lime" /> {time ? `${time} IST` : "IST"} · Hyderabad, India
                 </span>
               </div>
 

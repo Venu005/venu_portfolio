@@ -42,7 +42,7 @@ export default function Hero() {
             src={profile.heroImage}
             depthSrc={profile.heroDepth ?? undefined}
             alt="Portrait of Venusai Yalamanchili"
-            className="h-full w-full [mask-image:radial-gradient(ellipse_50%_58%_at_50%_50%,#000_45%,transparent_100%)]"
+            className="h-full w-full [mask-image:radial-gradient(ellipse_50%_52%_at_50%_46%,#000_50%,transparent_100%)]"
           />
         )}
         <Signature

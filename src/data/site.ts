@@ -6,16 +6,16 @@ export const profile = {
   nickname: "Venu",
   role: "Software Engineer",
   company: "Heizen",
-  location: "India · IST (UTC+5:30)",
+  location: "Hyderabad, India · IST (UTC+5:30)",
   email: "venusaiyalamanchili@gmail.com",
-  resume: "/Venusai_Yalamanchili_Resume.pdf",
+  resume: "https://drive.google.com/file/d/1fvA8rxYiz1GSr7_Vd8w1gS2D5MC-ugqv/view?usp=sharing",
   // Hero portrait (rendered with the interactive 3D effect). Replace the placeholder with your own photo,
   // e.g. "/me/hero.jpg": a centred head-and-shoulders shot on a plain background works best.
-  heroImage: "/me/placeholder-portrait.jpg",
+  heroImage: "/me/hero.jpg",
   // Optional grayscale depth map for the hero photo (white = near). Leave null to use the built-in head/shoulders depth.
   heroDepth: null as string | null,
   // Extra photos for the scattered "polaroids" in the About section. Leave empty to show stat cards only.
-  gallery: [] as { src: string; caption: string }[],
+  gallery: [{ src: "/projects/unison.jpg", caption: "Unison, 2026" }] as { src: string; caption: string }[],
   socials: [
     { label: "GitHub", short: "GH", href: "https://github.com/Venu005" },
     {
@@ -24,11 +24,12 @@ export const profile = {
       href: "https://www.linkedin.com/in/venusai-yalamanchili/",
     },
     { label: "X / Twitter", short: "X", href: "https://x.com/__venusai" },
+    { label: "LeetCode", short: "LC", href: "https://leetcode.com/u/QTu0ynsPME/" },
   ],
 };
 
 export const stats = [
-  { value: "4–6", unit: "wks", label: "To ship ITC Agri's platform against an 8-week plan" },
+  { value: "4–6", unit: "wks", label: "To ship an enterprise supply chain platform, against an 8-week plan" },
   { value: "90", unit: "%", label: "Cut in 200+ hrs/week of manual data collation" },
   { value: "<120", unit: "ms", label: "API responses with 30–120s LLM jobs queued in the background" },
   { value: "800", unit: "+", label: "DSA problems solved · LeetCode Knight" },
@@ -51,13 +52,13 @@ export const experience: Role[] = [
     period: "Apr 2026 — Present",
     mode: "Hybrid",
     summary:
-      "Building the supply chain visibility & OTIF analytics platform for ITC Agri's spices export business.",
+      "Building a supply chain visibility & OTIF analytics platform for a large agri-export business.",
     points: [
-      "Replaced Excel trackers, email chains and siloed SAP data for a Rs. 19,700 Cr division moving 35,000+ MT/yr, and shipped it in 4–6 weeks against an 8-week plan.",
+      "Replaced Excel trackers, email chains and siloed SAP data for an export division moving 35,000+ MT/yr, and shipped it in 4–6 weeks against an 8-week plan.",
       "Digitized 21 manual touchpoints into 23 tracked stage gates. Order creation went from hours to under 5 minutes, and status lag from 48–72 hrs to under 1 minute.",
       "Built OTIF & delay dashboards with real-time bottleneck alerts. They replaced 20 hrs/week of manual reporting and helped cut manual data collation by 90%.",
       "Shipped an AI chatbot that answers voice & text questions over the operations database, cutting managers' information gathering from days to minutes.",
-      "Built Spice Board compliance tracking with full audit trails and tablet-first operator UIs, designed from 20 days on-site across 5 plant visits.",
+      "Built regulatory compliance tracking with full audit trails and tablet-first operator UIs, designed from 20 days on-site across 5 plant visits.",
     ],
     stack: ["Next.js", "Nest.js", "PostgreSQL", "LangGraph", "AWS"],
   },
@@ -110,6 +111,7 @@ export const projects: Project[] = [
     stack: ["Swift", "SwiftUI", "SwiftNIO", "Kotlin", "Jetpack Compose", "mTLS 1.3", "WebSocket"],
     year: "2026",
     kind: "Native apps · Solo build",
+    image: "/projects/unison.jpg",
     links: [
       { label: "Website", href: "https://venu005.github.io/unison/" },
       { label: "GitHub", href: "https://github.com/Venu005/unison" },
@@ -118,13 +120,13 @@ export const projects: Project[] = [
     highlights: ["Mutual TLS 1.3 + cert pinning", "SHA-256 verified transfers", "341+ commits"],
   },
   {
-    name: "ITC Agri Spices Platform",
-    tagline: "Supply chain visibility for a Rs. 19,700 Cr export division.",
+    name: "Agri Export Ops Platform",
+    tagline: "Supply chain visibility for a large export division.",
     description:
       "An end-to-end order lifecycle, OTIF analytics and an AI ops chatbot that replaced spreadsheets and email chains. Designed on the plant floor, shipped ahead of schedule.",
     stack: ["Next.js", "Nest.js", "PostgreSQL", "LangGraph", "AWS"],
     year: "2026",
-    kind: "Client work · Heizen",
+    kind: "Company project · Heizen",
     links: [],
     accent: "dark",
     highlights: ["23 tracked stage gates", "48–72 hrs → <1 min status lag", "Shipped in 4–6 weeks"],
@@ -136,7 +138,7 @@ export const projects: Project[] = [
       "A WebRTC voice interview platform with natural TTS. Heavy LLM inference runs on async queues, so the product stays snappy for candidates.",
     stack: ["LiveKit", "ElevenLabs", "BullMQ", "Node.js", "Redis"],
     year: "2025",
-    kind: "Product · Heizen",
+    kind: "Company project · Heizen",
     links: [],
     accent: "cream",
     highlights: ["<120 ms API responses", "30–120s jobs offloaded"],
@@ -149,7 +151,7 @@ export const projects: Project[] = [
     stack: ["TypeScript", "MCP", "Zod", "Docker", "GitHub Actions"],
     year: "2025",
     kind: "Open source",
-    links: [{ label: "GitHub", href: "https://github.com/Venu005" }],
+    links: [{ label: "GitHub", href: "https://github.com/Venu005/expense-tracker-mcp-server" }],
     accent: "dark",
     highlights: ["100+ test scenarios", "5s cold starts"],
   },
@@ -160,7 +162,7 @@ export const projects: Project[] = [
       "A GitHub App that reads pull requests, writes line-level comments and scores code across five quality dimensions.",
     stack: ["Probot", "OpenAI", "Node.js", "GitHub API"],
     year: "2025",
-    kind: "Product · Heizen",
+    kind: "Company project · Heizen",
     links: [],
     accent: "cream",
     highlights: ["87% comment accuracy"],
@@ -179,6 +181,36 @@ export const projects: Project[] = [
     ],
     image: "/projects/project-3.png",
     accent: "lime",
+  },
+  {
+    name: "CollabHub",
+    tagline: "A space to connect with teams and friends.",
+    description:
+      "A real-time collaboration platform: workspaces, channels and live messaging for teams and friends working on projects together.",
+    stack: ["Next.js", "Convex", "WebSockets", "TypeScript"],
+    year: "2024",
+    kind: "Side project",
+    links: [
+      { label: "Live", href: "https://collab-hub-flame.vercel.app/" },
+      { label: "GitHub", href: "https://github.com/Venu005/CollabHub" },
+    ],
+    image: "/projects/project-1.png",
+    accent: "dark",
+  },
+  {
+    name: "ExamFlow",
+    tagline: "Exam management, made easy.",
+    description:
+      "An AI-powered app that handles exam scheduling, seating arrangements and student performance tracking for institutions.",
+    stack: ["Next.js", "Groq", "Prisma", "PostgreSQL"],
+    year: "2024",
+    kind: "Side project",
+    links: [
+      { label: "Live", href: "https://exam-management-three.vercel.app/" },
+      { label: "GitHub", href: "https://github.com/Venu005/exam-management" },
+    ],
+    image: "/projects/project-2.png",
+    accent: "cream",
   },
 ];
 
