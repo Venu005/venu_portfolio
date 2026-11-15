@@ -18,7 +18,21 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        script: ["var(--font-script)", "cursive"],
+        serif: ["var(--font-serif)", "Georgia", "serif"],
+      },
       colors: {
+        ink: "#111112",
+        olive: "#282c20",
+        moss: "#343a26",
+        cream: "#f4f4ed",
+        lime: "#d2ff00",
+        leaf: "#b2c73a",
+        sage: "#b4b8a5",
+        stone: "#535450",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -85,6 +99,10 @@ const config = {
             height: "0",
           },
         },
+        marquee: {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(-50%)" },
+        },
         spotlight: {
           "0%": {
             opacity: "0",
@@ -100,6 +118,7 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         spotlight: "spotlight 2s ease .75s 1 forwards",
+        marquee: "marquee var(--marquee-duration, 30s) linear infinite",
       },
     },
   },
