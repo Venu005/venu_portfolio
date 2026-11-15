@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Venusai Yalamanchili — Portfolio
 
-## Getting Started
+Personal site for **Venusai Yalamanchili**, software engineer and freelance developer. Built with Next.js 14, Tailwind CSS, Framer Motion and Lenis smooth scrolling.
 
-First, run the development server:
+## Run locally
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Editing content
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+All copy lives in [`src/data/site.ts`](src/data/site.ts): profile, stats, experience, projects, services, skills and achievements.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### Your photos
 
-## Learn More
+- **Hero portrait:** put a photo in `public/me/` (e.g. `public/me/hero.jpg`) and set `profile.heroImage` to `"/me/hero.jpg"`.
+  A centred head-and-shoulders shot on a plain background works best. It's rendered with the interactive WebGL effect
+  (`src/components/site/Photo3D.tsx`): the photo turns toward the cursor, and hovering reveals a lime "x-ray" layer.
+- **Optional depth map:** for a stronger 3D effect, add a grayscale depth map of the same photo (white = near) and set
+  `profile.heroDepth`. Without one, a built-in head-and-shoulders depth is used.
+- **Polaroids:** add `{ src, caption }` entries to `profile.gallery` to scatter photos around the About statement.
 
-To learn more about Next.js, take a look at the following resources:
+## Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- `src/app/` — layout, global styles
+- `src/sections/` — page sections (Hero, About, Tracks, Experience, Work, Services, Skills, Contact, Footer)
+- `src/components/site/` — shared pieces (Nav, Loader, Photo3D, Marquee, Reveal, SmoothScroll…)

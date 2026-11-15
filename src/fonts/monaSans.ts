@@ -68,4 +68,6 @@ export const monaSans = localFont({
       style: "italic",
     },
   ],
+  variable: "--font-display",
+  display: "swap",
 });

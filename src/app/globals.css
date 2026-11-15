@@ -4,276 +4,153 @@
 
 @layer base {
   :root {
-    --background: 0 0% 97.6471%;
-    --foreground: 0 0% 22.7451%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 22.7451%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 22.7451%;
-    --primary: 0 0% 37.6471%;
-    --primary-foreground: 0 0% 94.1176%;
-    --secondary: 0 0% 87.0588%;
-    --secondary-foreground: 0 0% 22.7451%;
-    --muted: 0 0% 89.0196%;
-    --muted-foreground: 0 0% 31.3725%;
-    --accent: 47.4419 64.1791% 86.8627%;
-    --accent-foreground: 14.2105 25.6757% 29.0196%;
-    --destructive: 0 41.4894% 63.1373%;
+    /* shadcn tokens (kept so ui/* components still work) */
+    --background: 60 7% 7%;
+    --foreground: 54 22% 93%;
+    --card: 75 15% 11%;
+    --card-foreground: 54 22% 93%;
+    --popover: 75 15% 11%;
+    --popover-foreground: 54 22% 93%;
+    --primary: 72 100% 50%;
+    --primary-foreground: 60 7% 7%;
+    --secondary: 75 13% 15%;
+    --secondary-foreground: 54 22% 93%;
+    --muted: 75 13% 15%;
+    --muted-foreground: 65 6% 52%;
+    --accent: 72 100% 50%;
+    --accent-foreground: 60 7% 7%;
+    --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0.8696% 45.098%;
-    --input: 0 0% 100%;
-    --ring: 0 0% 62.7451%;
-    --chart-1: 0 0% 20%;
-    --chart-2: 0 0% 33.3333%;
-    --chart-3: 0 0% 46.6667%;
-    --chart-4: 0 0% 60%;
-    --chart-5: 0 0% 73.3333%;
-    --sidebar: 0 0% 94.1176%;
-    --sidebar-foreground: 0 0% 22.7451%;
-    --sidebar-primary: 0 0% 37.6471%;
-    --sidebar-primary-foreground: 0 0% 94.1176%;
-    --sidebar-accent: 47.4419 64.1791% 86.8627%;
-    --sidebar-accent-foreground: 14.2105 25.6757% 29.0196%;
-    --sidebar-border: 0 0% 75.2941%;
-    --sidebar-ring: 0 0% 62.7451%;
-    --font-sans: Architects Daughter, sans-serif;
-    --font-serif: "Times New Roman", Times, serif;
-    --font-mono: "Courier New", Courier, monospace;
-    --radius: 0.625rem;
-    --shadow-2xs: 1px 4px 5px 0px hsl(0 0% 0% / 0.01);
-    --shadow-xs: 1px 4px 5px 0px hsl(0 0% 0% / 0.01);
-    --shadow-sm: 1px 4px 5px 0px hsl(0 0% 0% / 0.03),
-      1px 1px 2px -1px hsl(0 0% 0% / 0.03);
-    --shadow: 1px 4px 5px 0px hsl(0 0% 0% / 0.03),
-      1px 1px 2px -1px hsl(0 0% 0% / 0.03);
-    --shadow-md: 1px 4px 5px 0px hsl(0 0% 0% / 0.03),
-      1px 2px 4px -1px hsl(0 0% 0% / 0.03);
-    --shadow-lg: 1px 4px 5px 0px hsl(0 0% 0% / 0.03),
-      1px 4px 6px -1px hsl(0 0% 0% / 0.03);
-    --shadow-xl: 1px 4px 5px 0px hsl(0 0% 0% / 0.03),
-      1px 8px 10px -1px hsl(0 0% 0% / 0.03);
-    --shadow-2xl: 1px 4px 5px 0px hsl(0 0% 0% / 0.07);
-    --tracking-normal: 0.5px;
-    --spacing: 0.25rem;
+    --border: 60 6% 22%;
+    --input: 60 6% 22%;
+    --ring: 72 100% 50%;
+    --radius: 1rem;
   }
 
-  .dark {
-    --background: 0 0% 16.8627%;
-    --foreground: 0 0% 86.2745%;
-    --card: 0 0% 20%;
-    --card-foreground: 0 0% 86.2745%;
-    --popover: 0 0% 20%;
-    --popover-foreground: 0 0% 86.2745%;
-    --primary: 0 0% 69.0196%;
-    --primary-foreground: 0 0% 16.8627%;
-    --secondary: 0 0% 35.2941%;
-    --secondary-foreground: 0 0% 75.2941%;
-    --muted: 0 0% 27.0588%;
-    --muted-foreground: 0 0% 62.7451%;
-    --accent: 0 0% 87.8431%;
-    --accent-foreground: 0 0% 20%;
-    --destructive: 0 35.5932% 76.8627%;
-    --destructive-foreground: 0 0% 16.8627%;
-    --border: 0 0% 30.9804%;
-    --input: 0 0% 20%;
-    --ring: 0 0% 75.2941%;
-    --chart-1: 0 0% 93.7255%;
-    --chart-2: 0 0% 81.5686%;
-    --chart-3: 0 0% 69.0196%;
-    --chart-4: 0 0% 56.4706%;
-    --chart-5: 0 0% 43.9216%;
-    --sidebar: 0 0% 12.9412%;
-    --sidebar-foreground: 0 0% 86.2745%;
-    --sidebar-primary: 0 0% 69.0196%;
-    --sidebar-primary-foreground: 0 0% 12.9412%;
-    --sidebar-accent: 0 0% 87.8431%;
-    --sidebar-accent-foreground: 0 0% 20%;
-    --sidebar-border: 0 0% 30.9804%;
-    --sidebar-ring: 0 0% 75.2941%;
-    --font-sans: Architects Daughter, sans-serif;
-    --font-serif: Georgia, serif;
-    --font-mono: "Fira Code", "Courier New", monospace;
-    --radius: 0.625rem;
-    --shadow-2xs: 1px 4px 5px 0px hsl(0 0% 0% / 0.01);
-    --shadow-xs: 1px 4px 5px 0px hsl(0 0% 0% / 0.01);
-    --shadow-sm: 1px 4px 5px 0px hsl(0 0% 0% / 0.03),
-      1px 1px 2px -1px hsl(0 0% 0% / 0.03);
-    --shadow: 1px 4px 5px 0px hsl(0 0% 0% / 0.03),
-      1px 1px 2px -1px hsl(0 0% 0% / 0.03);
-    --shadow-md: 1px 4px 5px 0px hsl(0 0% 0% / 0.03),
-      1px 2px 4px -1px hsl(0 0% 0% / 0.03);
-    --shadow-lg: 1px 4px 5px 0px hsl(0 0% 0% / 0.03),
-      1px 4px 6px -1px hsl(0 0% 0% / 0.03);
-    --shadow-xl: 1px 4px 5px 0px hsl(0 0% 0% / 0.03),
-      1px 8px 10px -1px hsl(0 0% 0% / 0.03);
-    --shadow-2xl: 1px 4px 5px 0px hsl(0 0% 0% / 0.07);
-  }
-
-  body {
-    letter-spacing: var(--tracking-normal);
-  }
-}
-
-.web-word {
-  position: relative;
-  display: inline-block;
-}
-
-.web-word::after {
-  content: "";
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background-color: #00ff00;
-  border-radius: 50%;
-  top: 50%;
-  left: calc(100% + 5px);
-  transform: translateY(-50%);
-  animation: blink 1s infinite;
-}
-
-@keyframes blink {
-  0%,
-  50% {
-    opacity: 1;
-  }
-  51%,
-  100% {
-    opacity: 0;
-  }
-}
-@layer base {
   * {
     @apply border-border;
   }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-olive text-cream;
+    overflow-x: hidden;
   }
-}
-/* Animation for the pulsing effect */
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
+
+  ::selection {
+    background: #d2ff00;
+    color: #111112;
   }
 }
 
-/* Animation for the ping effect */
-@keyframes ping {
-  75%,
-  100% {
-    transform: scale(2);
-    opacity: 0;
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-[1440px] px-4 sm:px-8 lg:px-12;
+  }
+
+  .eyebrow {
+    @apply font-sans text-[11px] font-semibold uppercase tracking-[0.2em] sm:text-xs;
+  }
+
+  .display {
+    @apply font-display font-black uppercase leading-[0.85] tracking-[-0.01em];
+  }
+
+  /* the elegant serif used for emphasised words in headlines */
+  .accent {
+    @apply font-serif font-normal normal-case tracking-normal text-leaf;
+    font-size: 1.08em;
+  }
+  .accent-up {
+    @apply font-serif font-normal uppercase tracking-normal text-leaf;
+    font-size: 1.04em;
+  }
+
+  /* card with the cut corner tab (bottom-left notch) */
+  .notch {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 46% 100%, 40% calc(100% - 22px), 0 calc(100% - 22px));
+  }
+
+  .btn-lime {
+    @apply inline-flex items-center gap-2 rounded-md bg-lime px-4 py-2.5 font-display text-sm font-extrabold uppercase tracking-wide text-ink transition-transform duration-300 hover:scale-[1.04] active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 rounded-full border border-current px-5 py-3 text-sm font-semibold transition-colors duration-300;
+  }
+
+  .chip {
+    @apply inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium;
   }
 }
 
-/* Custom animations for the orbital timeline */
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+/* subtle film grain over the whole site */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: grain 8s steps(10) infinite;
 }
 
-.animate-ping {
-  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-5%, 4%); }
+  40% { transform: translate(4%, -6%); }
+  60% { transform: translate(-3%, 7%); }
+  80% { transform: translate(6%, -2%); }
 }
 
-/* Transitions */
-.transition-all {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+/* hand-drawn signature stroke animation */
+.signature path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 2.2s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  animation-delay: var(--delay, 0s);
 }
 
-.duration-300 {
-  transition-duration: 300ms;
+@keyframes draw {
+  to { stroke-dashoffset: 0; }
 }
 
-.duration-700 {
-  transition-duration: 700ms;
+.pulse-dot {
+  position: relative;
+}
+.pulse-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: inherit;
+  animation: pulse-ring 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(2.6); opacity: 0; }
 }
 
-.duration-1000 {
-  transition-duration: 1000ms;
-}
-
-/* Backdrop blur */
-.backdrop-blur-lg {
-  backdrop-filter: blur(16px);
-}
-
-/* Custom gradients */
-.bg-gradient-orbital {
-  background: linear-gradient(to bottom right, #6366f1, #3b82f6, #14b8a6);
-}
-
-/* Z-index utilities */
-.z-10 {
-  z-index: 10;
-}
-
-.z-50 {
-  z-index: 50;
-}
-
-/* Custom shadows */
-.shadow-orbital {
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-}
-
-/* Custom transforms */
-.scale-125 {
-  transform: scale(1.25);
-}
-
-.scale-150 {
-  transform: scale(1.5);
-}
-
-/* Custom opacity values */
-.opacity-70 {
-  opacity: 0.7;
-}
-
-.opacity-50 {
-  opacity: 0.5;
-}
-
-/* Custom border opacity */
-.border-white\/10 {
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.border-white\/20 {
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.border-white\/30 {
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.border-white\/40 {
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
-/* Custom background opacity */
-.bg-black\/90 {
-  background-color: rgba(0, 0, 0, 0.9);
-}
-
-.bg-white\/50 {
-  background-color: rgba(255, 255, 255, 0.5);
-}
-
-.bg-white\/80 {
-  background-color: rgba(255, 255, 255, 0.8);
-}
-
-/* Custom text opacity */
-.text-white\/70 {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.text-white\/80 {
-  color: rgba(255, 255, 255, 0.8);
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .signature path { stroke-dashoffset: 0; }
 }
