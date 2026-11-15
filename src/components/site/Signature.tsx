@@ -20,8 +20,10 @@ const spans = lengths.reduce<[number, number][]>((acc, l) => {
 
 type Props = {
   className?: string;
-  /** "mount": writes once on load · "inView": writes when scrolled into view · "scroll": scrubbed by `progress` */
-  mode?: "mount" | "inView" | "scroll";
+  /** "mount": writes once on load · "inView": writes when scrolled into view · "scroll": scrubbed by `progress` ·
+   *  "trigger": writes quickly whenever `active` becomes true, rewinds when it turns false */
+  mode?: "mount" | "inView" | "scroll" | "trigger";
+  active?: boolean;
   progress?: MotionValue<number>;
   /** for mode="scroll": the part of `progress` over which it writes */
   range?: [number, number];
@@ -31,14 +33,23 @@ type Props = {
 };
 
 /** Venu's signature, written stroke by stroke. Colour comes from `currentColor`. */
-export default function Signature({ className, mode = "inView", progress, range = [0, 1], delay = 0, duration = 1.8, label = "Venu's signature" }: Props) {
+export default function Signature({ className, mode = "inView", active = false, progress, range = [0, 1], delay = 0, duration = 1.8, label = "Venu's signature" }: Props) {
   const id = useId().replace(/:/g, "");
   const ref = useRef<SVGSVGElement>(null);
   const inView = useInView(ref, { once: true, margin: "-10% 0px" });
   const local = useMotionValue(0);
 
   useEffect(() => {
-    if (mode === "scroll") return;
+    if (mode !== "trigger") return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const c = active
+      ? animate(local, 1, { duration: reduce ? 0 : duration, ease: [0.5, 0, 0.2, 1] })
+      : animate(local, 0, { duration: reduce ? 0 : 0.35, ease: "easeIn" });
+    return () => c.stop();
+  }, [mode, active, duration, local]);
+
+  useEffect(() => {
+    if (mode === "scroll" || mode === "trigger") return;
     if (mode === "inView" && !inView) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
