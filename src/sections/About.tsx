@@ -3,7 +3,7 @@ import { motion, useScroll, useTransform, type MotionValue } from "framer-motion
 import Image from "next/image";
 import { useRef } from "react";
 import { profile } from "@/data/site";
-import { FadeUp } from "@/components/site/Reveal";
+import { FadeUp, ScrollFill, Wipe } from "@/components/site/Reveal";
 import Signature from "@/components/site/Signature";
 
 type Piece = { kind: "stat"; big: string; small: string; caption: string } | { kind: "img"; src: string; caption: string };
@@ -46,16 +46,20 @@ export default function About() {
       </div>
 
       <div className="container-x relative">
-        <FadeUp className="mb-10 text-center">
-          <span className="eyebrow text-cream/70">Software engineer since 2025</span>
-        </FadeUp>
-        <h2 className="mx-auto max-w-[15ch] text-center font-display text-[11vw] font-black uppercase leading-[0.9] text-cream sm:text-[8vw] lg:max-w-[16ch] lg:text-[5.6vw]">
-          <Reveal>
-            <span className="accent-up">Building</span> software that ships, turning <span className="accent-up">messy</span> workflows into
-            products people <span className="accent-up">love</span>. Full-stack, AI and real-time, from <span className="accent-up">idea</span> to
-            production.
-          </Reveal>
-        </h2>
+        {/* "message from" moment: the signature writes itself as you scroll */}
+        <div className="mb-12 flex flex-col items-center gap-4 text-center">
+          <div className="w-[64vw] max-w-[420px] text-lime">
+            <Signature mode="scroll" progress={scrollYProgress} range={[0.08, 0.3]} strokeWidth={4.5} />
+          </div>
+          <span className="eyebrow text-cream/70">
+            <Wipe>A message from Venu</Wipe>
+          </span>
+        </div>
+        <ScrollFill
+          className="mx-auto max-w-[15ch] text-center font-display text-[11vw] font-black uppercase leading-[0.92] text-cream sm:text-[8vw] lg:max-w-[16ch] lg:text-[5.6vw]"
+          accentClassName="accent-up"
+          text="*Building* software that ships, turning *messy* workflows into products people *love.* Full-stack, AI and real-time, from *idea* to production."
+        />
 
         {/* mobile: stats as a grid */}
         <div className="mt-16 grid grid-cols-2 gap-3 lg:hidden">
@@ -74,7 +78,7 @@ export default function About() {
             <p className="font-serif text-4xl leading-[1.05] text-cream sm:text-5xl">
               “Ship it, learn from real users, then ship it <span className="text-lime">better</span>.”
             </p>
-            <Signature text="— Venu" className="mt-6 text-5xl text-lime" />
+            <Signature className="mt-6 w-44 text-lime" strokeWidth={6} />
           </FadeUp>
           <FadeUp delay={0.1} className="space-y-5 text-base leading-relaxed text-cream/75 sm:text-lg">
             <p>
@@ -91,20 +95,6 @@ export default function About() {
         </div>
       </div>
     </section>
-  );
-}
-
-function Reveal({ children }: { children: React.ReactNode }) {
-  return (
-    <motion.span
-      className="inline"
-      initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once: true, margin: "-15% 0px" }}
-      transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.span>
   );
 }
 

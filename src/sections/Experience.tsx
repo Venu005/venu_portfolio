@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { experience } from "@/data/site";
-import { FadeUp } from "@/components/site/Reveal";
+import { FadeUp, Wipe } from "@/components/site/Reveal";
 import { cn } from "@/lib/utils";
 
 export default function Experience() {
@@ -12,7 +12,7 @@ export default function Experience() {
     <section id="experience" className="bg-olive py-24 sm:py-32">
       <div className="container-x">
         <div className="flex items-center justify-between border-b border-cream/15 pb-4">
-          <span className="eyebrow text-cream/60">Experience</span>
+          <span className="eyebrow text-cream/60"><Wipe>Experience</Wipe></span>
           <span className="eyebrow text-cream/60">2025 — Now</span>
         </div>
         <FadeUp>

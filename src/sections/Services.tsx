@@ -1,7 +1,7 @@
 "use client";
 import { ArrowUpRight } from "lucide-react";
 import { process, services } from "@/data/site";
-import { FadeUp } from "@/components/site/Reveal";
+import { FadeUp, Wipe } from "@/components/site/Reveal";
 
 export default function Services() {
   return (
@@ -13,7 +13,7 @@ export default function Services() {
 
       <div className="container-x pb-24 pt-[14vw] sm:pb-32 lg:pt-[10vw]">
         <div className="flex items-center justify-between border-b border-olive/15 pb-4">
-          <span className="eyebrow">Freelance</span>
+          <span className="eyebrow"><Wipe>Freelance</Wipe></span>
           <span className="eyebrow flex items-center gap-2">
             <span className="pulse-dot h-2 w-2 rounded-full bg-[#7a9a00]" /> Taking new projects
           </span>

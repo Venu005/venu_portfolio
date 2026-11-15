@@ -17,7 +17,7 @@ export const profile = {
   heroHead: { cx: 0.492, cy: 0.325, rx: 0.295, ry: 0.276 },
   // Alternate look revealed on hover / scroll: SAME framing and size as heroCutout (e.g. wearing a helmet),
   // background removed. While null, a lime "x-ray" version of the cutout is used instead.
-  heroAlt: null as string | null,
+  heroAlt: "/me/hero-alt.webp" as string | null,
   // Original photo, used for link previews.
   photo: "/me/hero.jpg",
   // Extra photos for the scattered "polaroids" in the About section. Leave empty to show stat cards only.

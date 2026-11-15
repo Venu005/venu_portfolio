@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { ArrowUpRight, Check, Copy } from "lucide-react";
 import { profile } from "@/data/site";
-import { FadeUp } from "@/components/site/Reveal";
+import { FadeUp, Wipe } from "@/components/site/Reveal";
 import { cn } from "@/lib/utils";
 
 const types = ["Web app", "AI / LLM feature", "Backend / API", "MVP", "Something else"];
@@ -46,7 +46,7 @@ export default function Contact() {
       <div className="container-x grid gap-14 lg:grid-cols-[1fr_1.1fr] lg:gap-20">
         <div>
           <FadeUp>
-            <span className="eyebrow text-cream/60">Contact</span>
+            <span className="eyebrow text-cream/60"><Wipe>Contact</Wipe></span>
             <h2 className="mt-6 font-display text-[19vw] font-black uppercase leading-[0.8] text-cream sm:text-[12vw] lg:text-[8.5vw]">
               Let&apos;s
               <br />

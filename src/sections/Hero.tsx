@@ -2,7 +2,7 @@
 import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
-import { ArrowUpRight, MousePointer2 } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { profile } from "@/data/site";
 import Signature from "@/components/site/Signature";
 import { Wipe } from "@/components/site/Reveal";
@@ -58,14 +58,14 @@ export default function Hero() {
         </motion.div>
 
         <motion.div style={{ opacity: uiFade }} className="pointer-events-none absolute inset-0 z-20 [&_a]:pointer-events-auto">
-          {/* signature */}
-          <div className="absolute bottom-[30%] right-[6%] sm:right-[20%]">
-            <Signature text={profile.nickname} delay={D + 1.1} className="-rotate-[10deg] text-[20vw] text-[#7a9a00] sm:text-[7vw]" />
+          {/* big signature beside the head */}
+          <div className="absolute bottom-[27%] right-[2%] w-[46vw] -rotate-[8deg] text-[#7a9a00] sm:bottom-[29%] sm:right-[17%] sm:w-[19vw]">
+            <Signature mode="mount" delay={D + 1.2} duration={2.4} strokeWidth={5.5} />
           </div>
 
           {/* status chip top-centre */}
-          <div className="absolute left-1/2 top-[9.5vh] hidden -translate-x-1/2 flex-col items-center gap-1.5 text-center md:flex">
-            <MousePointer2 className="h-4 w-4 text-olive" />
+          <div className="absolute left-1/2 top-[1.6vh] hidden -translate-x-1/2 flex-col items-center gap-1 text-center md:flex">
+            <Signature mode="mount" delay={D + 0.6} duration={1.8} strokeWidth={7} className="w-[86px] text-[#7a9a00]" />
             <AnimatePresence mode="wait">
               <motion.span
                 key={helmet ? "on" : "off"}
@@ -74,7 +74,7 @@ export default function Hero() {
                 exit={{ opacity: 0, y: -6 }}
                 className="eyebrow text-[10px] text-olive/70"
               >
-                {helmet ? (profile.heroAlt ? "Helmet on · ready to ship" : "Debug mode on") : "Hover my head"}
+                {helmet ? "Visor on · ready to ship" : "Hover my head"}
               </motion.span>
             </AnimatePresence>
           </div>
