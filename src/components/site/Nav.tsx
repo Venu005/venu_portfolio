@@ -32,12 +32,20 @@ export default function Nav() {
     check();
     const t1 = setTimeout(check, 600);
     const t2 = setTimeout(check, 2600); // after the loader lifts
-    window.addEventListener("scroll", check, { passive: true });
+    let pending = 0;
+    const onScroll = () => {
+      check();
+      // the section's light/dark flag can flip during this scroll; check again once React has re-rendered
+      clearTimeout(pending);
+      pending = window.setTimeout(check, 80);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", check);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
-      window.removeEventListener("scroll", check);
+      clearTimeout(pending);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", check);
     };
   }, []);

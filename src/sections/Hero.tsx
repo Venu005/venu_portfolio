@@ -1,5 +1,5 @@
 "use client";
-import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
@@ -11,49 +11,72 @@ const FluidHero = dynamic(() => import("@/components/site/FluidHero"), { ssr: fa
 
 const D = 1.5; // wait for the loader
 const ease = [0.22, 1, 0.36, 1] as const;
+const lineA = "Ship it, learn from real users, then ship it better · ";
+const lineB = "I build software people actually use · ";
 
+/**
+ * Hero + "message" as one pinned scene. The same portrait is used throughout:
+ * it starts full-size with the fluid ink, shrinks into a framed photo as you scroll,
+ * darkens, and then the signature writes itself across it.
+ */
 export default function Hero() {
   const ref = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const nameY = useTransform(scrollYProgress, [0, 1], ["0%", "-25%"]);
-  const uiFade = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const { scrollYProgress: p } = useScroll({ target: ref, offset: ["start start", "end end"] });
   const [helmet, setHelmet] = useState(false);
+  const [dark, setDark] = useState(false);
+  useMotionValueEvent(p, "change", (v) => setDark(v > 0.16));
+
+  const bg = useTransform(p, [0, 0.28], ["#f4f4ed", "#282c20"]);
+  const topo = useTransform(p, [0, 0.28], [0.9, 0.1]);
+  const uiFade = useTransform(p, [0, 0.1], [1, 0]);
+  const uiEvents = useTransform(p, (v) => (v < 0.08 ? "auto" : "none"));
+  const linesOpacity = useTransform(p, [0.14, 0.3], [0, 1]);
+  const xA = useTransform(p, [0, 1], ["5%", "-35%"]);
+  const xB = useTransform(p, [0, 1], ["-40%", "0%"]);
+  const labelOpacity = useTransform(p, [0.36, 0.46], [0, 1]);
 
   return (
-    <section ref={ref} id="top" data-nav="light" className="relative bg-cream">
-      <div className="relative h-[100svh] min-h-[620px] overflow-hidden text-olive">
+    <motion.section ref={ref} id="top" data-nav={dark ? "dark" : "light"} style={{ backgroundColor: bg }} className="relative h-[420vh]">
+      <div className="sticky top-0 h-[100svh] min-h-[620px] overflow-hidden text-olive">
         {/* topographic lines */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 bg-[url('/topo.svg')] bg-cover bg-center opacity-90" />
+        <motion.div aria-hidden style={{ opacity: topo }} className="pointer-events-none absolute inset-0 bg-[url('/topo.svg')] bg-cover bg-center" />
 
-        {/* giant name behind the head */}
-        <motion.div style={{ y: nameY }} className="pointer-events-none absolute inset-0 flex flex-col justify-between pb-[24vh] pt-[11vh] sm:pb-[15vh] sm:pt-[12vh]">
-          <Line delay={D} className="pl-3 text-left sm:pl-4">
-            Venusai
-          </Line>
-          <Line delay={D + 0.1} className="pr-3 text-right sm:pr-4" serif>
-            Yalamanchili
-          </Line>
+        {/* giant sliding lines behind the framed photo */}
+        <motion.div aria-hidden style={{ opacity: linesOpacity }} className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 select-none">
+          <motion.div style={{ x: xA }} className="whitespace-nowrap font-serif text-[15vw] uppercase leading-[0.9] text-leaf sm:text-[9.5vw]">
+            {lineA.repeat(4)}
+          </motion.div>
+          <motion.div style={{ x: xB }} className="whitespace-nowrap font-display text-[15vw] font-black uppercase leading-[0.9] text-cream sm:text-[9.5vw]">
+            {lineB.repeat(5)}
+          </motion.div>
         </motion.div>
 
-        {/* fluid ink + portrait (the visor shows wherever the ink covers the head) */}
-        <motion.div
-          className="absolute inset-0 z-10"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.3, ease, delay: D + 0.1 }}
-        >
+        {/* portrait + fluid ink (one canvas for the whole scene) */}
+        <motion.div className="absolute inset-0 z-10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2, ease, delay: D }}>
           <FluidHero
             src={profile.heroCutout}
             altSrc={profile.heroAlt}
             imageAspect={profile.heroCutoutAspect}
             head={profile.heroHead}
+            progress={p}
             onAlt={setHelmet}
             className="h-full w-full"
           />
         </motion.div>
 
-        <motion.div style={{ opacity: uiFade }} className="pointer-events-none absolute inset-0 z-20 [&_a]:pointer-events-auto">
-          {/* status chip top-centre */}
+        {/* "a message from Venu" label + signature */}
+        <motion.div style={{ opacity: labelOpacity }} className="absolute inset-x-0 top-[11vh] z-20 flex flex-col items-center gap-2 text-center">
+          <span className="grid h-9 w-9 place-items-center rounded-md bg-lime font-display text-sm font-black text-ink">VY</span>
+          <span className="font-display text-[11px] font-extrabold uppercase tracking-wide text-cream">A message from Venu</span>
+        </motion.div>
+        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
+          <div className="w-[96vw] max-w-[1100px] -rotate-[4deg] text-lime drop-shadow-[0_8px_30px_rgba(0,0,0,.35)] sm:w-[64vw]">
+            <Signature mode="scroll" progress={p} range={[0.5, 0.9]} />
+          </div>
+        </div>
+
+        {/* hero UI (fades out as the scene starts) */}
+        <motion.div style={{ opacity: uiFade, pointerEvents: uiEvents }} className="absolute inset-0 z-20 [&>*]:pointer-events-auto pointer-events-none">
           <div className="absolute left-1/2 top-[1.6vh] hidden -translate-x-1/2 flex-col items-center gap-1 text-center md:flex">
             <Signature mode="mount" delay={D + 0.6} duration={1.6} className="w-[78px] text-[#7a9a00]" />
             <AnimatePresence mode="wait">
@@ -69,7 +92,6 @@ export default function Hero() {
             </AnimatePresence>
           </div>
 
-          {/* bottom-left notched card */}
           <motion.div
             className="absolute bottom-6 left-4 hidden sm:block"
             initial={{ opacity: 0, y: 20 }}
@@ -79,7 +101,6 @@ export default function Hero() {
             <NowCard />
           </motion.div>
 
-          {/* bottom-right CTA */}
           <motion.div
             className="absolute bottom-6 right-6 hidden max-w-[300px] flex-col items-end gap-3 text-right sm:flex"
             initial={{ opacity: 0, y: 20 }}
@@ -98,7 +119,6 @@ export default function Hero() {
             </a>
           </motion.div>
 
-          {/* mobile CTA row */}
           <motion.div
             className="absolute inset-x-3 bottom-4 flex items-center justify-between gap-3 sm:hidden"
             initial={{ opacity: 0, y: 20 }}
@@ -117,26 +137,7 @@ export default function Hero() {
           </motion.div>
         </motion.div>
       </div>
-    </section>
-  );
-}
-
-function Line({ children, className, delay, serif }: { children: string; className?: string; delay: number; serif?: boolean }) {
-  return (
-    <div className={`overflow-hidden ${className}`}>
-      <motion.h1
-        className={
-          serif
-            ? "font-serif text-[16.5vw] uppercase leading-[0.8] text-[#7a9a00] sm:text-[12.4vw]"
-            : "font-display text-[25vw] font-black uppercase leading-[0.8] text-olive sm:text-[19.5vw]"
-        }
-        initial={{ y: "105%" }}
-        animate={{ y: "0%" }}
-        transition={{ duration: 1.2, ease, delay }}
-      >
-        {children}
-      </motion.h1>
-    </div>
+    </motion.section>
   );
 }
 
