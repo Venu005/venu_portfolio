@@ -7,24 +7,21 @@ import { profile } from "@/data/site";
 import Signature from "@/components/site/Signature";
 import { Wipe } from "@/components/site/Reveal";
 
-const HeroPortrait = dynamic(() => import("@/components/site/HeroPortrait"), { ssr: false });
+const FluidHero = dynamic(() => import("@/components/site/FluidHero"), { ssr: false });
 
 const D = 1.5; // wait for the loader
 const ease = [0.22, 1, 0.36, 1] as const;
 
 export default function Hero() {
   const ref = useRef<HTMLElement>(null);
-  // the hero is pinned for one extra screen of scroll: the helmet goes on as you scroll
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
-  const nameY = useTransform(scrollYProgress, [0, 1], ["0%", "-18%"]);
-  const headScale = useTransform(scrollYProgress, [0.4, 1], [1, 0.86]);
-  const headY = useTransform(scrollYProgress, [0.4, 1], ["0%", "6%"]);
-  const uiFade = useTransform(scrollYProgress, [0.55, 0.9], [1, 0]);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const nameY = useTransform(scrollYProgress, [0, 1], ["0%", "-25%"]);
+  const uiFade = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const [helmet, setHelmet] = useState(false);
 
   return (
-    <section ref={ref} id="top" data-nav="light" className="relative h-[190svh] bg-cream">
-      <div className="sticky top-0 h-[100svh] min-h-[620px] overflow-hidden text-olive">
+    <section ref={ref} id="top" data-nav="light" className="relative bg-cream">
+      <div className="relative h-[100svh] min-h-[620px] overflow-hidden text-olive">
         {/* topographic lines */}
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-[url('/topo.svg')] bg-cover bg-center opacity-90" />
 
@@ -38,34 +35,27 @@ export default function Hero() {
           </Line>
         </motion.div>
 
-        {/* 3D head + helmet */}
+        {/* fluid ink + portrait (the visor shows wherever the ink covers the head) */}
         <motion.div
-          style={{ scale: headScale, y: headY }}
-          className="absolute inset-x-0 bottom-0 top-[3vh] z-10 origin-bottom"
+          className="absolute inset-0 z-10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.3, ease, delay: D + 0.1 }}
         >
-          <HeroPortrait
+          <FluidHero
             src={profile.heroCutout}
             altSrc={profile.heroAlt}
             imageAspect={profile.heroCutoutAspect}
             head={profile.heroHead}
-            scrollProgress={scrollYProgress}
             onAlt={setHelmet}
             className="h-full w-full"
           />
         </motion.div>
 
         <motion.div style={{ opacity: uiFade }} className="pointer-events-none absolute inset-0 z-20 [&_a]:pointer-events-auto">
-          {/* big signature beside the head */}
-          <div className="absolute bottom-[27%] right-[2%] w-[46vw] -rotate-[8deg] text-[#7a9a00] sm:bottom-[29%] sm:right-[17%] sm:w-[19vw]">
-            <Signature mode="mount" delay={D + 1.2} duration={2.4} strokeWidth={5.5} />
-          </div>
-
           {/* status chip top-centre */}
           <div className="absolute left-1/2 top-[1.6vh] hidden -translate-x-1/2 flex-col items-center gap-1 text-center md:flex">
-            <Signature mode="mount" delay={D + 0.6} duration={1.8} strokeWidth={7} className="w-[86px] text-[#7a9a00]" />
+            <Signature mode="mount" delay={D + 0.6} duration={1.6} className="w-[78px] text-[#7a9a00]" />
             <AnimatePresence mode="wait">
               <motion.span
                 key={helmet ? "on" : "off"}
@@ -74,7 +64,7 @@ export default function Hero() {
                 exit={{ opacity: 0, y: -6 }}
                 className="eyebrow text-[10px] text-olive/70"
               >
-                {helmet ? "Visor on · ready to ship" : "Hover my head"}
+                {helmet ? "Visor on · ready to ship" : "Move your cursor"}
               </motion.span>
             </AnimatePresence>
           </div>
