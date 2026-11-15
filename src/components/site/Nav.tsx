@@ -42,7 +42,7 @@ export default function Nav() {
               onClick={() => setOpen((o) => !o)}
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
-              className="grid h-[38px] w-[38px] place-items-center rounded-md bg-cream text-ink transition-transform hover:scale-105"
+              className="grid h-[38px] w-[38px] place-items-center rounded-md bg-cream text-ink shadow-[0_2px_12px_rgba(0,0,0,.18)] ring-1 ring-ink/15 transition-transform hover:scale-105"
             >
               <span className="relative block h-3 w-4">
                 <span className={`absolute left-0 h-0.5 w-4 bg-current transition-all duration-300 ${open ? "top-[5px] rotate-45" : "top-0"}`} />
