@@ -5,7 +5,7 @@ import { FadeUp } from "@/components/site/Reveal";
 
 export default function Services() {
   return (
-    <section id="services" className="relative bg-cream text-olive">
+    <section id="services" data-nav="light" className="relative bg-cream text-olive">
       {/* curved top edge */}
       <svg className="absolute -top-px left-0 h-[6vw] w-full text-ink" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden>
         <path d="M0 0H100V2C70 10 30 10 0 2Z" fill="currentColor" />

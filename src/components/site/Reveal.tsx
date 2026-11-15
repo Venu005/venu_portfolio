@@ -103,3 +103,85 @@ function Word({
     </motion.span>
   );
 }
+
+/** Lime block wipes across, then the text appears underneath it (labels / eyebrows). */
+export function Wipe({
+  children,
+  className,
+  delay = 0,
+  animateOnMount = false,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
+  animateOnMount?: boolean;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-5% 0px" });
+  const show = animateOnMount || inView;
+  return (
+    <span ref={ref} className={cn("relative inline-block", className)}>
+      <motion.span
+        className="relative z-0 inline-block"
+        initial={{ opacity: 0 }}
+        animate={show ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ duration: 0.01, delay: delay + 0.35 }}
+      >
+        {children}
+      </motion.span>
+      <motion.span
+        aria-hidden
+        className="absolute inset-y-[-2px] left-0 z-10 w-full bg-lime"
+        initial={{ scaleX: 0, transformOrigin: "0% 50%" }}
+        animate={
+          show
+            ? { scaleX: [0, 1, 1, 0], transformOrigin: ["0% 50%", "0% 50%", "100% 50%", "100% 50%"] }
+            : { scaleX: 0 }
+        }
+        transition={{ duration: 0.8, times: [0, 0.45, 0.5, 1], ease: [0.76, 0, 0.24, 1], delay }}
+      />
+    </span>
+  );
+}
+
+/** Headline whose words fill in (dim → solid) as you scroll through it. Use `*word*` for the serif accent. */
+export function ScrollFill({ text, className, accentClassName }: { text: string; className?: string; accentClassName?: string }) {
+  const ref = useRef<HTMLHeadingElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.9", "end 0.5"] });
+  const words = text.split(" ");
+  return (
+    <h2 ref={ref} className={className} aria-label={text.replace(/\*/g, "")}>
+      {words.map((raw, i) => {
+        const accent = raw.startsWith("*");
+        const w = raw.replace(/\*/g, "");
+        return (
+          <FillWord key={i} progress={scrollYProgress} range={[i / words.length, Math.min(1, (i + 2) / words.length)]} className={accent ? accentClassName : undefined}>
+            {w}
+          </FillWord>
+        );
+      })}
+    </h2>
+  );
+}
+
+function FillWord({
+  children,
+  progress,
+  range,
+  className,
+}: {
+  children: string;
+  progress: MotionValue<number>;
+  range: [number, number];
+  className?: string;
+}) {
+  const opacity = useTransform(progress, range, [0.12, 1]);
+  const y = useTransform(progress, range, ["0.25em", "0em"]);
+  return (
+    <span aria-hidden className="inline-block overflow-hidden align-bottom">
+      <motion.span style={{ opacity, y }} className={cn("inline-block", className)}>
+        {children}&nbsp;
+      </motion.span>
+    </span>
+  );
+}

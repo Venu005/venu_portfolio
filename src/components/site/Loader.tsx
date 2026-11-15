@@ -31,7 +31,7 @@ export default function Loader() {
     <AnimatePresence>
       {!done && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-end justify-center bg-lime pb-6 text-ink"
+          data-nav-skip className="fixed inset-0 z-[100] flex items-end justify-center bg-lime pb-6 text-ink"
           exit={{ clipPath: "inset(0 0 100% 0)" }}
           initial={{ clipPath: "inset(0 0 0% 0)" }}
           transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}

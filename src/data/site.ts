@@ -9,11 +9,17 @@ export const profile = {
   location: "Hyderabad, India · IST (UTC+5:30)",
   email: "venusaiyalamanchili@gmail.com",
   resume: "https://drive.google.com/file/d/1fvA8rxYiz1GSr7_Vd8w1gS2D5MC-ugqv/view?usp=sharing",
-  // Hero portrait (rendered with the interactive 3D effect). Replace the placeholder with your own photo,
-  // e.g. "/me/hero.jpg": a centred head-and-shoulders shot on a plain background works best.
-  heroImage: "/me/hero.jpg",
-  // Optional grayscale depth map for the hero photo (white = near). Leave null to use the built-in head/shoulders depth.
-  heroDepth: null as string | null,
+  // Hero: background-removed portrait (transparent PNG/WebP) rendered in 3D with the helmet.
+  heroCutout: "/me/hero-cutout.webp",
+  heroCutoutAspect: 1086 / 1448,
+  // Where the head sits inside the cutout (fractions of the image): centre x/y and radius x/y.
+  // Used for the depth parallax and the hover hit-area.
+  heroHead: { cx: 0.492, cy: 0.325, rx: 0.295, ry: 0.276 },
+  // Alternate look revealed on hover / scroll: SAME framing and size as heroCutout (e.g. wearing a helmet),
+  // background removed. While null, a lime "x-ray" version of the cutout is used instead.
+  heroAlt: null as string | null,
+  // Original photo, used for link previews.
+  photo: "/me/hero.jpg",
   // Extra photos for the scattered "polaroids" in the About section. Leave empty to show stat cards only.
   gallery: [{ src: "/projects/unison.jpg", caption: "Unison, 2026" }] as { src: string; caption: string }[],
   socials: [

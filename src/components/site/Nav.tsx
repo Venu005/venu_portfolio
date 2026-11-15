@@ -19,8 +19,28 @@ export default function Nav() {
   const { scrollYProgress } = useScroll();
   const [progress, setProgress] = useState(0);
   const [open, setOpen] = useState(false);
+  const [light, setLight] = useState(true);
   const lenis = useLenis();
   useMotionValueEvent(scrollYProgress, "change", setProgress);
+
+  // switch the logo colour depending on the section behind it
+  useEffect(() => {
+    const check = () => {
+      const el = document.elementsFromPoint(24, 36).find((e) => !e.closest("header") && !e.closest("[data-nav-skip]"));
+      setLight(el?.closest("[data-nav]")?.getAttribute("data-nav") === "light");
+    };
+    check();
+    const t1 = setTimeout(check, 600);
+    const t2 = setTimeout(check, 2600); // after the loader lifts
+    window.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+    };
+  }, []);
 
   useEffect(() => {
     if (open) lenis?.stop();
@@ -31,7 +51,7 @@ export default function Nav() {
     <>
       <header className="pointer-events-none fixed inset-x-0 top-0 z-50 mix-blend-normal">
         <div className="flex items-start justify-between px-3 py-3 sm:px-4">
-          <a href="#top" aria-label="Venusai Yalamanchili, home" className="pointer-events-auto text-[17px] text-cream sm:text-[20px]">
+          <a href="#top" aria-label="Venusai Yalamanchili, home" className={`pointer-events-auto text-[17px] transition-colors duration-300 sm:text-[20px] ${open ? "text-ink" : light ? "text-olive" : "text-cream"}`}>
             <Logo />
           </a>
           <div className="pointer-events-auto flex items-center gap-2">
@@ -54,8 +74,8 @@ export default function Nav() {
       </header>
 
       {/* right-edge scroll indicator */}
-      <div aria-hidden className="fixed right-1.5 top-1/2 z-40 hidden h-[34vh] w-[3px] -translate-y-1/2 rounded-full bg-cream/10 md:block">
-        <div className="w-full rounded-full bg-cream/70" style={{ height: `${Math.max(8, progress * 100)}%` }} />
+      <div aria-hidden className="fixed right-1.5 top-1/2 z-40 hidden h-[34vh] w-[3px] -translate-y-1/2 rounded-full bg-stone/15 md:block">
+        <div className="w-full rounded-full bg-stone/70" style={{ height: `${Math.max(8, progress * 100)}%` }} />
       </div>
 
       <AnimatePresence>

@@ -34,14 +34,14 @@ export default function Footer() {
       <svg className="absolute -top-px left-0 z-10 h-[5vw] w-full text-olive" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden>
         <path d="M0 0H100V2C70 10 30 10 0 2Z" fill="currentColor" />
       </svg>
-      <div className="bg-[linear-gradient(to_bottom,#f4f4ed_0%,#e8f7a0_35%,#d2ff00_70%)] px-2 pb-2 pt-[16vh]">
+      <div data-nav="light" className="bg-[linear-gradient(to_bottom,#f4f4ed_0%,#e8f7a0_35%,#d2ff00_70%)] px-2 pb-2 pt-[16vh]">
         <div className="relative">
           {/* tab notch on top centre */}
           <svg className="absolute -top-[23px] left-1/2 h-6 w-[220px] -translate-x-1/2 text-olive sm:w-[260px]" viewBox="0 0 260 24" preserveAspectRatio="none" aria-hidden>
             <path d="M0 24C30 24 36 0 70 0H190C224 0 230 24 260 24Z" fill="currentColor" />
           </svg>
 
-          <div className="relative overflow-hidden rounded-[20px] bg-olive px-4 pb-6 pt-16 text-cream sm:px-8 sm:pt-20">
+          <div data-nav="dark" className="relative overflow-hidden rounded-[20px] bg-olive px-4 pb-6 pt-16 text-cream sm:px-8 sm:pt-20">
             {/* topographic lines */}
             <div
               aria-hidden

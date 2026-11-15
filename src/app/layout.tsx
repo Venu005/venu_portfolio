@@ -45,6 +45,7 @@ export const metadata: Metadata = {
     url: "https://venu-portfolio-t3ca.vercel.app",
     siteName: "Venusai Yalamanchili",
     type: "website",
+    images: [{ url: "/me/hero.jpg", width: 1086, height: 1448, alt: "Venusai Yalamanchili" }],
   },
   twitter: {
     card: "summary_large_image",
