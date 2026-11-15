@@ -97,7 +97,7 @@ export default function FluidHero({ src, altSrc, imageAspect, head, progress, cl
       el.width = Math.round(W * dpr);
       el.height = Math.round(H * dpr);
       gl.viewport(0, 0, el.width, el.height);
-      const ph = Math.min(H * 0.97, (W * 0.92) / imageAspect);
+      const ph = Math.min(H * 0.97, (W * 1.1) / imageAspect);
       heroRect = { x: (W - ph * imageAspect) / 2, y: H - ph, w: ph * imageAspect, h: ph };
       const aw = Math.min(W * (W < 640 ? 0.9 : 0.66), 1100);
       const ah = aw / 1.85;
@@ -350,7 +350,7 @@ void main() {
   vec4 alt = uHasAlt ? img(uAlt, uv) : base;
   vec4 face = mix(base, alt, inkAlt * uInk);
   // soften the photo's cropped side/bottom edges
-  float edge = smoothstep(0.0, 0.14, uv.x) * smoothstep(1.0, 0.86, uv.x) * smoothstep(0.0, 0.06, uv.y);
+  float edge = smoothstep(0.0, 0.015, uv.y);
   face.a *= edge;
   if (!inFrame) face.a = 0.0;
   // darken + desaturate for the signature moment

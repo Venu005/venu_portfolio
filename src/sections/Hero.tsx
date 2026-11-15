@@ -24,7 +24,11 @@ export default function Hero() {
   const { scrollYProgress: p } = useScroll({ target: ref, offset: ["start start", "end end"] });
   const [helmet, setHelmet] = useState(false);
   const [dark, setDark] = useState(false);
-  useMotionValueEvent(p, "change", (v) => setDark(v > 0.16));
+  const [sign, setSign] = useState(false);
+  useMotionValueEvent(p, "change", (v) => {
+    setDark(v > 0.16);
+    setSign(v > 0.44);
+  });
 
   const bg = useTransform(p, [0, 0.28], ["#f4f4ed", "#282c20"]);
   const topo = useTransform(p, [0, 0.28], [0.9, 0.1]);
@@ -36,7 +40,7 @@ export default function Hero() {
   const labelOpacity = useTransform(p, [0.36, 0.46], [0, 1]);
 
   return (
-    <motion.section ref={ref} id="top" data-nav={dark ? "dark" : "light"} style={{ backgroundColor: bg }} className="relative h-[420vh]">
+    <motion.section ref={ref} id="top" data-nav={dark ? "dark" : "light"} style={{ backgroundColor: bg }} className="relative h-[300vh]">
       <div className="sticky top-0 h-[100svh] min-h-[620px] overflow-hidden text-olive">
         {/* topographic lines */}
         <motion.div aria-hidden style={{ opacity: topo }} className="pointer-events-none absolute inset-0 bg-[url('/topo.svg')] bg-cover bg-center" />
@@ -71,7 +75,7 @@ export default function Hero() {
         </motion.div>
         <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
           <div className="w-[96vw] max-w-[1100px] -rotate-[4deg] text-lime drop-shadow-[0_8px_30px_rgba(0,0,0,.35)] sm:w-[64vw]">
-            <Signature mode="scroll" progress={p} range={[0.5, 0.9]} />
+            <Signature mode="trigger" active={sign} duration={1.1} />
           </div>
         </div>
 
@@ -102,7 +106,7 @@ export default function Hero() {
           </motion.div>
 
           <motion.div
-            className="absolute bottom-6 right-6 hidden max-w-[300px] flex-col items-end gap-3 text-right sm:flex"
+            className="absolute bottom-6 right-6 hidden max-w-[320px] flex-col items-end gap-3 rounded-2xl bg-cream/85 p-4 text-right backdrop-blur-md sm:flex"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: D + 1, duration: 0.8, ease }}

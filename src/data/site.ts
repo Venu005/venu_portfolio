@@ -11,10 +11,10 @@ export const profile = {
   resume: "https://drive.google.com/file/d/1fvA8rxYiz1GSr7_Vd8w1gS2D5MC-ugqv/view?usp=sharing",
   // Hero: background-removed portrait (transparent PNG/WebP) rendered in 3D with the helmet.
   heroCutout: "/me/hero-cutout.webp",
-  heroCutoutAspect: 1086 / 1448,
+  heroCutoutAspect: 1766 / 1448,
   // Where the head sits inside the cutout (fractions of the image): centre x/y and radius x/y.
   // Used for the depth parallax and the hover hit-area.
-  heroHead: { cx: 0.492, cy: 0.325, rx: 0.295, ry: 0.276 },
+  heroHead: { cx: 0.495, cy: 0.325, rx: 0.181, ry: 0.276 },
   // Alternate look revealed on hover / scroll: SAME framing and size as heroCutout (e.g. wearing a helmet),
   // background removed. While null, a lime "x-ray" version of the cutout is used instead.
   heroAlt: "/me/hero-alt.webp" as string | null,
