@@ -21,7 +21,14 @@ export const profile = {
   // Original photo, used for link previews.
   photo: "/me/hero.jpg",
   // Extra photos for the scattered "polaroids" in the About section. Leave empty to show stat cards only.
-  gallery: [{ src: "/projects/unison.jpg", caption: "Unison, 2026" }] as { src: string; caption: string }[],
+  // `ai: true` marks AI-generated images (shown with an "AI-generated" tag).
+  gallery: [
+    { src: "/me/gallery/whiteboard.webp", caption: "System design, 2026", ai: true },
+    { src: "/me/gallery/hackathon.webp", caption: "GDG Hackathon, 2025", ai: true },
+    { src: "/me/gallery/desk.webp", caption: "Late-night build, 2026", ai: true },
+    { src: "/me/gallery/plant-floor.webp", caption: "On the plant floor, 2026", ai: true },
+    { src: "/me/gallery/hyderabad.webp", caption: "Hyderabad, 2026", ai: true },
+  ] as { src: string; caption: string; ai?: boolean }[],
   socials: [
     { label: "GitHub", short: "GH", href: "https://github.com/Venu005" },
     {
@@ -104,6 +111,8 @@ export type Project = {
   kind: string;
   links: { label: string; href: string }[];
   image?: string;
+  /** true when the cover image is an AI-generated mockup */
+  aiImage?: boolean;
   accent: "lime" | "cream" | "dark";
   highlights?: string[];
 };
@@ -134,6 +143,8 @@ export const projects: Project[] = [
     year: "2026",
     kind: "Company project · Heizen",
     links: [],
+    image: "/projects/agri-ops.webp",
+    aiImage: true,
     accent: "dark",
     highlights: ["23 tracked stage gates", "48–72 hrs → <1 min status lag", "Shipped in 4–6 weeks"],
   },

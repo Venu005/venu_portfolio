@@ -133,7 +133,12 @@ export default function Footer() {
         </div>
 
         <div className="flex items-center justify-between px-2 pt-2 font-display text-[11px] font-extrabold uppercase text-ink">
-          <span>© {year} Venusai Yalamanchili. All rights reserved</span>
+          <span>
+            © {year} Venusai Yalamanchili. All rights reserved
+            <span className="mt-0.5 block font-sans text-[10px] font-medium normal-case opacity-70 sm:ml-2 sm:mt-0 sm:inline">
+              Some images (visor portrait, lifestyle photos, project mockups) are AI-generated.
+            </span>
+          </span>
           <a href="#top" className="inline-flex items-center gap-1">
             Back to top <ArrowUp className="h-3.5 w-3.5" />
           </a>

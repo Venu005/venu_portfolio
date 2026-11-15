@@ -6,11 +6,10 @@ import { profile } from "@/data/site";
 import { FadeUp, ScrollFill, Wipe } from "@/components/site/Reveal";
 import Signature from "@/components/site/Signature";
 
-type Piece = { kind: "stat"; big: string; small: string; caption: string } | { kind: "img"; src: string; caption: string };
+type Piece = { kind: "stat"; big: string; small: string; caption: string } | { kind: "img"; src: string; caption: string; ai?: boolean };
 
 const defaultPieces: Piece[] = [
   { kind: "stat", big: "4–6", small: "weeks to ship, vs 8 planned", caption: "Agri export platform, 2026" },
-  { kind: "img", src: "/projects/project-3.png", caption: "GDG Hackathon, 2025" },
   { kind: "stat", big: "90%", small: "less manual data collation", caption: "OTIF dashboards, 2026" },
   { kind: "stat", big: "<120ms", small: "API with 2-min LLM jobs queued", caption: "Voice AI, 2025" },
   { kind: "stat", big: "1st", small: "place out of 20+ teams", caption: "GDG Hackathon, 2025" },
@@ -34,7 +33,16 @@ const slots = [
 export default function About() {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const pieces: Piece[] = [...profile.gallery.map((g) => ({ kind: "img" as const, ...g })), ...defaultPieces].slice(0, slots.length);
+  const photos: Piece[] = profile.gallery.map((g) => ({ kind: "img" as const, ...g }));
+  // alternate photos and stat cards around the statement
+  const pieces: Piece[] = [];
+  const order = ["img", "stat", "img", "img", "stat", "img", "img", "stat"];
+  let pi = 0;
+  let si = 0;
+  for (const k of order) {
+    const next = k === "img" ? photos[pi++] ?? defaultPieces[si++] : defaultPieces[si++];
+    if (next) pieces.push(next);
+  }
 
   return (
     <section id="about" ref={ref} className="relative overflow-hidden bg-olive py-32 sm:py-48">
@@ -61,9 +69,19 @@ export default function About() {
           text="*Building* software that ships, turning *messy* workflows into products people *love.* Full-stack, AI and real-time, from *idea* to production."
         />
 
-        {/* mobile: stats as a grid */}
-        <div className="mt-16 grid grid-cols-2 gap-3 lg:hidden">
-          {pieces
+        {/* mobile: photo strip + stats grid */}
+        {photos.length > 0 && (
+          <div className="-mx-4 mt-16 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 lg:hidden" data-lenis-prevent>
+            {photos.map((p, i) => (
+              <figure key={i} className="w-[58vw] max-w-[260px] shrink-0 snap-start">
+                <figcaption className="eyebrow mb-1.5 text-[9px] text-cream/70">{p.caption}</figcaption>
+                <PhotoCard piece={p as Extract<Piece, { kind: "img" }>} sizes="60vw" />
+              </figure>
+            ))}
+          </div>
+        )}
+        <div className="mt-6 grid grid-cols-2 gap-3 lg:hidden">
+          {defaultPieces
             .filter((p) => p.kind === "stat")
             .slice(0, 6)
             .map((p, i) => (
@@ -102,7 +120,7 @@ function Floating({ piece, slot, progress }: { piece: Piece; slot: (typeof slots
   const y = useTransform(progress, [0, 1], [-slot.speed / 2, slot.speed / 2]);
   return (
     <motion.figure
-      className="absolute w-[130px] xl:w-[150px]"
+      className={`absolute ${piece.kind === "img" ? "w-[150px] xl:w-[175px]" : "w-[130px] xl:w-[150px]"}`}
       style={{ top: slot.top, left: slot.left, y, rotate: slot.rot }}
       initial={{ opacity: 0, scale: 0.8 }}
       whileInView={{ opacity: 1, scale: 1 }}
@@ -111,13 +129,24 @@ function Floating({ piece, slot, progress }: { piece: Piece; slot: (typeof slots
     >
       <figcaption className="eyebrow mb-1.5 text-[9px] text-cream/70">{piece.caption}</figcaption>
       {piece.kind === "img" ? (
-        <div className="relative aspect-[4/5] overflow-hidden bg-moss">
-          <Image src={piece.src} alt="" fill sizes="170px" className="object-cover" />
-        </div>
+        <PhotoCard piece={piece} sizes="180px" />
       ) : (
         <StatCard piece={piece} />
       )}
     </motion.figure>
+  );
+}
+
+function PhotoCard({ piece, sizes }: { piece: Extract<Piece, { kind: "img" }>; sizes: string }) {
+  return (
+    <div className="relative aspect-[4/5] overflow-hidden bg-moss">
+      <Image src={piece.src} alt={piece.caption} fill sizes={sizes} className="object-cover" />
+      {piece.ai && (
+        <span className="absolute bottom-1.5 left-1.5 rounded-sm bg-ink/70 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wider text-cream/90 backdrop-blur-sm">
+          AI-generated
+        </span>
+      )}
+    </div>
   );
 }
 

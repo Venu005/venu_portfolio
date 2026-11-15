@@ -44,6 +44,11 @@ export default function Work() {
                 <div className="notch relative aspect-[1/0.95] bg-cream/15 p-px transition-colors duration-500 group-hover:bg-lime">
                   <div className="notch relative h-full w-full overflow-hidden bg-ink">
                     <CardVisual project={p} index={i} />
+                    {p.aiImage && (
+                      <span className="absolute bottom-7 left-3 rounded-sm bg-ink/70 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-cream/90 backdrop-blur-sm">
+                        AI-generated mockup
+                      </span>
+                    )}
                     <div className="absolute inset-x-3 top-3 flex items-center justify-between">
                       <span className="eyebrow text-[10px] text-cream/50">{p.kind}</span>
                       <span className="grid h-8 w-8 place-items-center rounded-full bg-lime text-ink opacity-0 transition-all duration-500 group-hover:opacity-100">
