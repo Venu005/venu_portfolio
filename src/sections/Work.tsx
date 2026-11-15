@@ -169,6 +169,16 @@ function Detail({ project: p, onClose }: { project: Project; onClose: () => void
         <button onClick={onClose} aria-label="Close" className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-cream text-ink">
           <X className="h-5 w-5" />
         </button>
+        {p.image && (
+          <div className="relative -mx-6 -mt-6 mb-6 aspect-[16/10] overflow-hidden rounded-t-3xl bg-ink sm:-mx-10 sm:-mt-10 sm:mb-8">
+            <Image src={p.image} alt={`${p.name} preview`} fill sizes="(min-width:768px) 768px, 100vw" className="object-cover" />
+            {p.aiImage && (
+              <span className="absolute bottom-3 left-3 rounded-sm bg-ink/70 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-cream/90 backdrop-blur-sm">
+                AI-generated mockup
+              </span>
+            )}
+          </div>
+        )}
         <span className="eyebrow text-cream/60">
           {p.kind} · {p.year}
         </span>
