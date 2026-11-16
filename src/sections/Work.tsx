@@ -1,16 +1,24 @@
 "use client";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { ArrowUpRight, Lock, X } from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { ArrowRight, ArrowUpRight, Lock, X } from "lucide-react";
 import { projects, profile, type Project } from "@/data/site";
-import { FadeUp } from "@/components/site/Reveal";
 import { useLenis } from "@/components/site/SmoothScroll";
-import { cn } from "@/lib/utils";
+import Signature from "@/components/site/Signature";
+import { Wipe } from "@/components/site/Reveal";
 
+/**
+ * Pinned horizontal gallery: scrolling down glides a row of large project cards sideways,
+ * with an intro panel, a quote break and a closing call to action.
+ */
 export default function Work() {
   const [active, setActive] = useState<Project | null>(null);
   const lenis = useLenis();
+  const section = useRef<HTMLElement>(null);
+  const track = useRef<HTMLDivElement>(null);
+  const [dist, setDist] = useState(0);
+  const [count, setCount] = useState(1);
 
   useEffect(() => {
     if (active) lenis?.stop();
@@ -20,62 +28,79 @@ export default function Work() {
     return () => window.removeEventListener("keydown", onKey);
   }, [active, lenis]);
 
+  // how far the track needs to travel
+  useLayoutEffect(() => {
+    const measure = () => {
+      if (!track.current) return;
+      setDist(Math.max(0, track.current.scrollWidth - window.innerWidth));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (track.current) ro.observe(track.current);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
+  const { scrollYProgress } = useScroll({ target: section, offset: ["start start", "end end"] });
+  const x = useTransform(scrollYProgress, [0, 1], [0, -dist]);
+  const bar = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+  useMotionValueEvent(scrollYProgress, "change", (v) => setCount(Math.min(projects.length, Math.max(1, Math.round(v * projects.length + 0.5)))));
+
+  const cards = projects.map((p, i) => <Card key={p.name} project={p} index={i} onOpen={() => setActive(p)} />);
+  // quote break after the third project
+  cards.splice(3, 0, <Quote key="quote" />);
+
   return (
-    <section id="work" className="bg-ink pb-24 pt-24 sm:pt-32">
-      <div className="px-3 sm:px-4">
-        <div className="mb-10 grid gap-6 md:grid-cols-[1fr_auto_1fr] md:items-end">
-          <FadeUp>
-            <h2 className="font-display text-[15vw] font-black uppercase leading-[0.82] text-cream sm:text-[9vw] lg:text-[6.5vw]">
-              Projects
+    <section id="work" ref={section} className="relative bg-ink" style={{ height: `calc(100svh + ${dist}px)` }}>
+      <div className="sticky top-0 flex h-[100svh] flex-col overflow-hidden">
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-[url('/topo.svg')] bg-cover bg-center opacity-[0.06]" />
+
+        <motion.div ref={track} style={{ x }} className="relative flex h-full items-center gap-6 pl-4 pr-[8vw] will-change-transform sm:gap-10 sm:pl-10">
+          {/* intro panel */}
+          <div className="flex w-[82vw] shrink-0 flex-col justify-center sm:w-[36vw]">
+            <span className="eyebrow text-cream/60">
+              <Wipe>Selected work</Wipe>
+            </span>
+            <h2 className="mt-6 font-display text-[19vw] font-black uppercase leading-[0.8] text-cream sm:text-[8.5vw]">
+              Things
               <br />
-              <span className="font-serif font-normal text-leaf">Hall of fame</span>
+              I&apos;ve <span className="font-serif font-normal text-leaf">shipped</span>
             </h2>
-          </FadeUp>
-          <FadeUp delay={0.1} className="max-w-xs text-sm text-cream/75 md:mb-2">
-            From enterprise platforms to native apps I build after hours. Every project here shipped to real users. Tap a card for the story.
-          </FadeUp>
-          <div />
-        </div>
+            <p className="mt-8 max-w-sm text-cream/70">
+              Enterprise platforms, AI products and the native apps I build after hours. Scroll to browse, tap a card for the story.
+            </p>
+            <span className="mt-8 inline-flex items-center gap-2 font-display text-xs font-extrabold uppercase tracking-wide text-lime">
+              Keep scrolling <ArrowRight className="h-4 w-4" />
+            </span>
+          </div>
 
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((p, i) => (
-            <FadeUp key={p.name} delay={(i % 3) * 0.08} y={30}>
-              <button onClick={() => setActive(p)} className="group block w-full text-left" aria-label={`Open ${p.name} details`}>
-                <div className="notch relative aspect-[1/0.95] bg-cream/15 p-px transition-colors duration-500 group-hover:bg-lime">
-                  <div className="notch relative h-full w-full overflow-hidden bg-ink">
-                    <CardVisual project={p} index={i} />
-                    {p.aiImage && (
-                      <span className="absolute bottom-7 left-3 rounded-sm bg-ink/70 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-cream/90 backdrop-blur-sm">
-                        AI-generated mockup
-                      </span>
-                    )}
-                    <div className="absolute inset-x-3 top-3 flex items-center justify-between">
-                      <span className="eyebrow text-[10px] text-cream/50">{p.kind}</span>
-                      <span className="grid h-8 w-8 place-items-center rounded-full bg-lime text-ink opacity-0 transition-all duration-500 group-hover:opacity-100">
-                        <ArrowUpRight className="h-4 w-4" />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="-mt-[18px] flex items-center justify-end gap-2 pr-1 font-display text-xs font-extrabold uppercase sm:text-sm">
-                  <span className="text-cream">{p.name}</span>
-                  <span className="text-lime">{p.year}</span>
-                </div>
-              </button>
-            </FadeUp>
-          ))}
-        </div>
+          {cards}
 
-        <FadeUp className="mt-20 flex flex-col items-center gap-5 text-center">
-          <p className="font-serif text-3xl leading-tight text-cream sm:text-4xl">
-            See more experiments and open source
-            <br />
-            on my GitHub
-          </p>
-          <a href={profile.socials[0].href} target="_blank" rel="noreferrer" className="btn-lime">
-            View on GitHub <ArrowUpRight className="h-4 w-4" />
-          </a>
-        </FadeUp>
+          {/* closing panel */}
+          <div className="flex w-[78vw] shrink-0 flex-col items-start justify-center gap-6 sm:w-[30vw]">
+            <p className="font-serif text-4xl leading-tight text-cream sm:text-5xl">
+              More experiments
+              <br />
+              and open source on <span className="text-lime">GitHub</span>
+            </p>
+            <a href={profile.socials[0].href} target="_blank" rel="noreferrer" className="btn-lime">
+              View on GitHub <ArrowUpRight className="h-4 w-4" />
+            </a>
+          </div>
+        </motion.div>
+
+        {/* progress */}
+        <div className="pointer-events-none absolute inset-x-4 bottom-6 flex items-center gap-4 sm:inset-x-10">
+          <span className="font-display text-xs font-extrabold tabular-nums text-cream">
+            {String(count).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}
+          </span>
+          <div className="h-px flex-1 bg-cream/15">
+            <motion.div style={{ width: bar }} className="h-px bg-lime" />
+          </div>
+        </div>
       </div>
 
       <AnimatePresence>{active && <Detail project={active} onClose={() => setActive(null)} />}</AnimatePresence>
@@ -83,63 +108,58 @@ export default function Work() {
   );
 }
 
-function CardVisual({ project: p, index }: { project: Project; index: number }) {
-  if (p.image)
-    return (
-      <Image
-        src={p.image}
-        alt=""
-        fill
-        sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
-        className="object-cover opacity-80 transition-all duration-700 group-hover:scale-105 group-hover:opacity-100"
-      />
-    );
-  if (p.name === "Unison") return <UnisonVisual />;
+function Card({ project: p, index, onOpen }: { project: Project; index: number; onOpen: () => void }) {
+  const offset = index % 2 === 1 ? "sm:translate-y-[7vh]" : "sm:-translate-y-[4vh]";
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center">
-      <span className="font-serif text-[40vw] leading-[0.7] text-moss transition-all duration-700 group-hover:scale-110 group-hover:text-lime sm:text-[20vw] lg:text-[13vw]">
-        {String(index + 1).padStart(2, "0")}
-      </span>
-      <span className="max-w-[80%] font-display text-xl font-black uppercase leading-none text-cream sm:text-2xl">{p.tagline}</span>
-    </div>
-  );
-}
-
-function UnisonVisual() {
-  return (
-    <div className="absolute inset-0 flex items-center justify-center gap-5 p-8 text-lime transition-transform duration-700 group-hover:scale-105">
-      <div className="w-[52%]">
-        <div className="aspect-[16/10] rounded-lg border-2 border-lime/70 p-2">
-          <div className="flex h-3 items-center justify-end gap-1 border-b border-lime/30 pb-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-lime" />
-            <span className="text-[7px] font-bold">87%</span>
-          </div>
-          <div className="mt-1.5 space-y-1">
-            {["photo_0412.jpg", "notes.pdf", "clip.mov"].map((f, i) => (
-              <div key={f} className="flex justify-between rounded bg-lime/10 px-1.5 py-0.5 text-[8px]">
-                <span>{f}</span>
-                <span>{i === 0 ? "✓" : `${40 + i * 25}%`}</span>
-              </div>
+    <button onClick={onOpen} aria-label={`Open ${p.name} details`} className={`group w-[82vw] shrink-0 text-left sm:w-[40vw] lg:w-[34vw] ${offset}`}>
+      <div className="mb-2 flex items-center justify-between">
+        <span className="eyebrow text-[10px] text-cream/60">
+          {p.kind}, {p.year}
+        </span>
+        {p.aiImage && <span className="text-[9px] font-semibold uppercase tracking-wider text-cream/40">AI-generated mockup</span>}
+      </div>
+      <div className="notch relative aspect-[16/11] overflow-hidden bg-moss">
+        {p.image ? (
+          <Image
+            src={p.image}
+            alt=""
+            fill
+            sizes="(min-width:1024px) 34vw, (min-width:640px) 40vw, 82vw"
+            className="object-cover transition-transform duration-[900ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.06]"
+          />
+        ) : (
+          <div className="absolute inset-0 grid place-items-center font-serif text-[30vw] text-lime/30 sm:text-[12vw]">{String(index + 1).padStart(2, "0")}</div>
+        )}
+        <span className="absolute right-3 top-3 grid h-10 w-10 scale-75 place-items-center rounded-full bg-lime text-ink opacity-0 transition-all duration-500 group-hover:scale-100 group-hover:opacity-100">
+          <ArrowUpRight className="h-5 w-5" />
+        </span>
+      </div>
+      <div className="mt-5 flex items-start gap-4">
+        <span className="font-serif text-4xl leading-none text-lime">{String(index + 1).padStart(2, "0")}</span>
+        <div className="min-w-0">
+          <h3 className="font-display text-3xl font-black uppercase leading-[0.9] text-cream transition-colors group-hover:text-lime sm:text-4xl">{p.name}</h3>
+          <p className="mt-2 font-serif text-xl leading-tight text-leaf">{p.tagline}</p>
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {p.stack.slice(0, 4).map((t) => (
+              <span key={t} className="rounded-md border border-cream/15 px-2 py-1 text-[11px] text-cream/70">
+                {t}
+              </span>
             ))}
           </div>
         </div>
-        <div className="mx-auto h-1.5 w-[112%] -translate-x-[5%] rounded-b bg-lime/70" />
       </div>
-      <div className="relative flex w-10 items-center">
-        <div className="w-full border-t-2 border-dashed border-lime/60" />
-        <motion.span
-          className="absolute h-2.5 w-2.5 rounded-full bg-lime"
-          animate={{ left: ["0%", "90%", "0%"] }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </div>
-      <div className="aspect-[9/19] w-[18%] rounded-xl border-2 border-lime/70 p-1">
-        <div className="mx-auto h-0.5 w-4 rounded-full bg-lime/50" />
-        <div className="mt-2 grid grid-cols-3 gap-0.5 p-0.5">
-          {Array.from({ length: 9 }).map((_, i) => (
-            <span key={i} className={cn("aspect-square", [0, 2, 4, 6, 7].includes(i) ? "bg-lime" : "bg-lime/15")} />
-          ))}
-        </div>
+    </button>
+  );
+}
+
+function Quote() {
+  return (
+    <div className="flex w-[78vw] shrink-0 flex-col justify-center gap-6 sm:w-[28vw]">
+      <p className="font-serif text-4xl leading-[1.05] text-cream sm:text-5xl">
+        “I spent 20 days on factory floors before designing a <span className="text-lime">single screen</span>.”
+      </p>
+      <div className="w-40 text-lime">
+        <Signature />
       </div>
     </div>
   );

@@ -35,8 +35,6 @@ export default function Hero() {
   const uiFade = useTransform(p, [0, 0.1], [1, 0]);
   const uiEvents = useTransform(p, (v) => (v < 0.08 ? "auto" : "none"));
   const linesOpacity = useTransform(p, [0.14, 0.3], [0, 1]);
-  const xA = useTransform(p, [0, 1], ["5%", "-35%"]);
-  const xB = useTransform(p, [0, 1], ["-40%", "0%"]);
   const labelOpacity = useTransform(p, [0.36, 0.46], [0, 1]);
 
   return (
@@ -47,12 +45,15 @@ export default function Hero() {
 
         {/* giant sliding lines behind the framed photo */}
         <motion.div aria-hidden style={{ opacity: linesOpacity }} className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 select-none">
-          <motion.div style={{ x: xA }} className="whitespace-nowrap font-serif text-[15vw] uppercase leading-[0.9] text-leaf sm:text-[9.5vw]">
-            {lineA.repeat(4)}
-          </motion.div>
-          <motion.div style={{ x: xB }} className="whitespace-nowrap font-display text-[15vw] font-black uppercase leading-[0.9] text-cream sm:text-[9.5vw]">
-            {lineB.repeat(5)}
-          </motion.div>
+          {/* continuous marquees, running in opposite directions */}
+          <div className="flex w-max animate-marquee whitespace-nowrap font-serif text-[15vw] uppercase leading-[0.9] text-leaf [--marquee-duration:38s] sm:text-[9.5vw]">
+            <span>{lineA.repeat(3)}</span>
+            <span>{lineA.repeat(3)}</span>
+          </div>
+          <div className="flex w-max animate-marquee whitespace-nowrap font-display text-[15vw] font-black uppercase leading-[0.9] text-cream [--marquee-duration:30s] [animation-direction:reverse] sm:text-[9.5vw]">
+            <span>{lineB.repeat(4)}</span>
+            <span>{lineB.repeat(4)}</span>
+          </div>
         </motion.div>
 
         {/* portrait + fluid ink (one canvas for the whole scene) */}
