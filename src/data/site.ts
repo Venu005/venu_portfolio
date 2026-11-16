@@ -171,7 +171,7 @@ export const projects: Project[] = [
     year: "2025",
     kind: "Open source",
     links: [{ label: "GitHub", href: "https://github.com/Venu005/expense-tracker-mcp-server" }],
-    image: "/projects/expense-mcp.webp",
+    image: "/projects/expense-mcp-v2.webp",
     aiImage: true,
     accent: "dark",
     highlights: ["100+ test scenarios", "5s cold starts"],
