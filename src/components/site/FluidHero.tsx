@@ -2,7 +2,6 @@
 import { useEffect, useRef } from "react";
 import type { MotionValue } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { CursorFluid } from "./cursorFluid";
 
 export type HeadBox = { cx: number; cy: number; rx: number; ry: number };
 
@@ -17,6 +16,9 @@ type Props = {
   onAlt?: (on: boolean) => void;
 };
 
+const MAX = 56;
+type Blob = { x: number; y: number; vx: number; vy: number; r: number; age: number; life: number; ambient?: number; alt?: boolean };
+
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 const smooth = (a: number, b: number, v: number) => {
   const t = clamp01((v - a) / (b - a));
@@ -28,9 +30,8 @@ const lerpR = (a: R, b: R, t: number): R => ({ x: lerp(a.x, b.x, t), y: lerp(a.y
 
 /**
  * One canvas for the whole hero → message scene.
- *  - Hero: a drifting contour-line field behind a big still portrait. Moving the cursor stirs a low-res
- *    velocity-only fluid; wherever the fluid moves, the background flips to a grey banded palette and the
- *    visor portrait shows. When idle, a virtual cursor sweeps a figure-eight so the effect plays on its own.
+ *  - Hero: big still portrait; small, quick liquid ink blobs trail the cursor (grey on the background,
+ *    the visor wherever they cross the head) and a few drift around the edges.
  *  - Scroll: the very same portrait shrinks into a framed photo, then darkens for the signature moment.
  */
 export default function FluidHero({ src, altSrc, imageAspect, head, progress, className, onAlt }: Props) {
@@ -43,37 +44,47 @@ export default function FluidHero({ src, altSrc, imageAspect, head, progress, cl
     const el = canvas.current!;
     const wrap = host.current!;
     const gl = el.getContext("webgl", { premultipliedAlpha: false, alpha: true, antialias: false });
-    if (!gl) {
+    const prog = gl && createProgram(gl, VERT, FRAG);
+    if (!gl || !prog) {
       wrap.dataset.fallback = "1";
       return;
     }
-    const derivatives = !!gl.getExtension("OES_standard_derivatives");
-    const prog = createProgram(gl, VERT, (derivatives ? "#extension GL_OES_standard_derivatives : enable\n#define HAS_DERIV 1\n" : "") + FRAG);
-    if (!prog) {
-      wrap.dataset.fallback = "1";
-      return;
-    }
+    gl.useProgram(prog);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     const buf = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, "aPos");
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     const u = (n: string) => gl.getUniformLocation(prog, n);
     const U = {
-      res: u("uRes"), rect: u("uRect"), frame: u("uFrame"), frameCol: u("uFrameCol"), frameA: u("uFrameA"),
-      dark: u("uDark"), ink: u("uInk"), bgA: u("uBgA"), time: u("uTime"), mouse: u("uMouse"), pace: u("uPace"),
-      hasAlt: u("uHasAlt"), hasVel: u("uHasVel"), base: u("uBase"), alt: u("uAlt"), vel: u("uVel"),
+      res: u("uRes"),
+      rect: u("uRect"),
+      frame: u("uFrame"),
+      frameCol: u("uFrameCol"),
+      frameA: u("uFrameA"),
+      dark: u("uDark"),
+      ink: u("uInk"),
+      blobs: u("uBlobs"),
+      count: u("uCount"),
+      time: u("uTime"),
+      hasAlt: u("uHasAlt"),
     };
+    gl.uniform1i(u("uBase"), 0);
+    gl.uniform1i(u("uAlt"), 1);
+    gl.uniform1i(U.hasAlt, 0);
 
-    const fluid = new CursorFluid(gl);
-
-    let baseTex: WebGLTexture | null = null;
-    let altTex: WebGLTexture | null = null;
-    loadTexture(gl, src).then((t) => (baseTex = t)).catch(() => (wrap.dataset.fallback = "1"));
-    if (altSrc) loadTexture(gl, altSrc).then((t) => (altTex = t)).catch(() => {});
+    let ready = false;
+    loadTexture(gl, src, 0).then(() => (ready = true)).catch(() => (wrap.dataset.fallback = "1"));
+    if (altSrc) loadTexture(gl, altSrc, 1).then(() => gl.uniform1i(U.hasAlt, 1)).catch(() => {});
 
     let W = 1, H = 1, dpr = 1;
     let heroRect: R = { x: 0, y: 0, w: 1, h: 1 };
     let frameA: R = heroRect, frameB: R = heroRect, portA: R = heroRect, portB: R = heroRect;
     const portraitIn = (f: R): R => {
+      // head fills the frame: portrait taller than the frame, cropped at the shoulders
       const h = f.h * 1.32;
       const w = h * imageAspect;
       return { x: f.x + (f.w - w) / 2, y: f.y - f.h * 0.06, w, h };
@@ -85,6 +96,7 @@ export default function FluidHero({ src, altSrc, imageAspect, head, progress, cl
       H = Math.max(1, r.height);
       el.width = Math.round(W * dpr);
       el.height = Math.round(H * dpr);
+      gl.viewport(0, 0, el.width, el.height);
       const ph = Math.min(H * 0.97, (W * 1.1) / imageAspect);
       heroRect = { x: (W - ph * imageAspect) / 2, y: H - ph, w: ph * imageAspect, h: ph };
       const aw = Math.min(W * (W < 640 ? 0.9 : 0.66), 1100);
@@ -95,150 +107,156 @@ export default function FluidHero({ src, altSrc, imageAspect, head, progress, cl
       frameB = { x: (W - bw) / 2, y: (H - bh) / 2 + H * 0.02, w: bw, h: bh };
       portA = portraitIn(frameA);
       portB = portraitIn(frameB);
-      fluid.resize(W, H);
     };
     resize();
     const ro = new ResizeObserver(resize);
     ro.observe(wrap);
 
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const blobs: Blob[] = [];
+    const sc = () => Math.min(W, H) / 900;
+    // ambient blobs live in the margins left and right of the portrait
+    for (let i = 0; i < 6; i++) blobs.push({ x: 0, y: 0, vx: 0, vy: 0, r: 0, age: 0, life: Infinity, ambient: i + 1 });
 
-    // ---- cursor state (normalised device coords, -1..1, y up) ----
-    const mouse = { x: 0, y: 0 };
-    const eased = { x: 0, y: 0, pace: 0 };
-    let moving = false;
-    let moveTimer = 0;
-    let idleStart = 0;
-    const firstIdle = window.setTimeout(() => {
-      moving = false;
-      idleStart = performance.now();
-    }, 2500);
-    let overHeadUntil = 0;
-    let portNow: R = heroRect;
+    let last: { x: number; y: number; t: number } | null = null;
+    let lastActive = -1e9;
+    const spawn = (x: number, y: number, vx: number, vy: number, energy: number) => {
+      const s = sc();
+      blobs.push({ x, y, vx, vy, r: (16 + Math.random() * 20) * s * (0.75 + energy * 0.6), age: 0, life: 0.65 + Math.random() * 0.55 });
+      let trail = 0;
+      for (const b of blobs) if (!b.ambient) trail++;
+      while (trail > MAX - 8) {
+        const i = blobs.findIndex((b) => !b.ambient);
+        blobs.splice(i, 1);
+        trail--;
+      }
+    };
     const onMove = (e: PointerEvent) => {
       const r = wrap.getBoundingClientRect();
-      mouse.x = ((e.clientX - r.left) / r.width) * 2 - 1;
-      mouse.y = -(((e.clientY - r.top) / r.height) * 2 - 1);
-      moving = true;
-      clearTimeout(firstIdle);
-      clearTimeout(moveTimer);
-      moveTimer = window.setTimeout(() => {
-        moving = false;
-        idleStart = performance.now();
-      }, 2000);
       const x = e.clientX - r.left;
       const y = e.clientY - r.top;
-      const hx = portNow.x + head.cx * portNow.w;
-      const hy = portNow.y + head.cy * portNow.h;
-      const ex = (x - hx) / (head.rx * portNow.w * 1.4);
-      const ey = (y - hy) / (head.ry * portNow.h * 1.3);
-      if (ex * ex + ey * ey < 1) overHeadUntil = performance.now() + 900;
+      const t = performance.now();
+      if (y < 0 || y > H) {
+        last = null;
+        return;
+      }
+      lastActive = t;
+      if (last) {
+        const dx = x - last.x;
+        const dy = y - last.y;
+        const dist = Math.hypot(dx, dy);
+        const steps = Math.min(8, Math.floor(dist / 9));
+        if (steps === 0) return;
+        const dt = Math.max(8, t - last.t);
+        for (let s = 1; s <= steps; s++) {
+          const k = s / steps;
+          // throw the ink forward along the cursor's direction, with a little spread
+          const spread = (Math.random() - 0.5) * 1.6;
+          spawn(last.x + dx * k, last.y + dy * k, (dx / dt) * 9 + spread, (dy / dt) * 9 - spread, Math.min(1, dist / 50));
+        }
+      }
+      last = { x, y, t };
     };
     window.addEventListener("pointermove", onMove);
     let visible = true;
     const io = new IntersectionObserver(([en]) => (visible = en.isIntersecting));
     io.observe(wrap);
 
-    // idle cursor: a figure-eight sweep across the screen (2.5s out, 1.5s pause, 2.5s back, then 3s rest)
-    const ease = (t: number) => 0.5 - Math.cos(Math.PI * t) / 2;
-    const idleCursor = (t: number) => {
-      const c = t % 9.5;
-      let px = 0, py = 0;
-      if (c < 2.5) {
-        py = c / 2.5;
-        px = ease(c / 2.5);
-      } else if (c < 4) {
-        px = py = 1;
-      } else if (c < 6.5) {
-        py = 1 - (c - 4) / 2.5;
-        px = 1 - ease((c - 4) / 2.5);
-      }
-      return { x: -Math.cos(px * Math.PI * 4) * 0.75, y: Math.cos(py * Math.PI) * 0.5 };
-    };
-
+    const data = new Float32Array(MAX * 4);
     const start = performance.now();
-    let last = { x: 0, y: 0 };
-    let acc = 0;
-    let prevT = start;
+    let prev = start;
     let altOn = false;
     let raf = 0;
 
     const frame = () => {
       raf = requestAnimationFrame(frame);
-      if (!baseTex || !visible) return;
+      if (!ready || !visible) return;
       const now = performance.now();
+      const dt = Math.min(0.05, (now - prev) / 1000);
+      prev = now;
       const t = (now - start) / 1000;
+      const s = sc();
       const p = progress?.get() ?? 0;
 
+      // scene geometry for this scroll position
       const k1 = smooth(0, 0.3, p);
       const k2 = smooth(0.3, 0.5, p);
       const fullscreen: R = { x: 0, y: 0, w: W, h: H };
       const frameR = k2 > 0 ? lerpR(frameA, frameB, k2) : lerpR(fullscreen, frameA, k1);
       const portR = k2 > 0 ? lerpR(portA, portB, k2) : lerpR(heroRect, portA, k1);
-      portNow = portR;
       const inkK = 1 - smooth(0, 0.12, p);
 
-      // ---- simulation at a fixed 60 steps/s ----
-      acc += Math.min(0.1, (now - prevT) / 1000);
-      prevT = now;
-      let cur = moving || reduce ? mouse : idleCursor((now - idleStart) / 1000);
-      if (!moving && !reduce && idleStart === 0) cur = mouse;
-      while (acc >= 1 / 60) {
-        acc -= 1 / 60;
-        const dx = cur.x - last.x;
-        const dy = cur.y - last.y;
-        last = { x: cur.x, y: cur.y };
-        if (fluid.ok && inkK > 0.01) fluid.step(cur.x, cur.y, dx, dy);
-        // eased cursor + pace for the contour bend
-        eased.x += (mouse.x - eased.x) * 0.025;
-        eased.y += (mouse.y - eased.y) * 0.025;
-        eased.pace += (Math.min(1, Math.hypot(dx, dy) * 12) - eased.pace) * 0.01;
+      // blobs
+      const margin = (W - heroRect.w * 0.7) / 2; // keep ambient ink off the photo
+      for (let i = blobs.length - 1; i >= 0; i--) {
+        const b = blobs[i];
+        if (b.ambient) {
+          const k = b.ambient;
+          const left = k % 2 === 0;
+          const band = Math.max(margin, W * 0.12);
+          b.x = (left ? 0 : W - band) + band * (0.5 + 0.42 * Math.sin(t * (0.35 + k * 0.07) + k * 1.9));
+          b.y = H * (0.5 + 0.46 * Math.cos(t * (0.28 + k * 0.05) + k * 2.7));
+          b.r = (48 + 26 * Math.sin(t * 1.1 + k)) * s * (reduce ? 0 : 1);
+          b.alt = false;
+          continue;
+        }
+        b.age += dt;
+        if (b.age > b.life) {
+          blobs.splice(i, 1);
+          continue;
+        }
+        b.x += b.vx * dt * 60 * 0.5;
+        b.y += b.vy * dt * 60 * 0.5;
+        b.vx *= 0.9;
+        b.vy *= 0.9;
       }
-      // idle sweep passing over the head also counts as "visor on"
-      const hx = ((portR.x + head.cx * portR.w) / W) * 2 - 1;
-      const hy = -(((portR.y + head.cy * portR.h) / H) * 2 - 1);
-      const overHead = now < overHeadUntil || (!moving && Math.abs(cur.x - hx) < 0.25 && Math.abs(cur.y - hy) < 0.4);
+      // touch screens: an occasional quick ink burst over the head so the visor still appears
+      if (coarse && !reduce && now - lastActive > 2500 && Math.random() < 0.06) {
+        const hx = portR.x + head.cx * portR.w + (Math.random() - 0.5) * portR.w * 0.25;
+        const hy = portR.y + head.cy * portR.h + (Math.random() - 0.5) * portR.h * 0.2;
+        spawn(hx, hy, (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 3, 1);
+      }
 
-      // ---- composite ----
-      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      gl.viewport(0, 0, el.width, el.height);
-      gl.useProgram(prog);
-      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      const loc = gl.getAttribLocation(prog, "aPos");
-      gl.enableVertexAttribArray(loc);
-      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-      gl.enable(gl.BLEND);
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, baseTex);
-      gl.uniform1i(U.base, 0);
-      gl.activeTexture(gl.TEXTURE1);
-      gl.bindTexture(gl.TEXTURE_2D, altTex ?? baseTex);
-      gl.uniform1i(U.alt, 1);
-      gl.uniform1i(U.hasAlt, altTex ? 1 : 0);
-      if (fluid.ok) gl.uniform1i(U.vel, fluid.bind(2));
-      gl.uniform1i(U.hasVel, fluid.ok ? 1 : 0);
+      let n = 0;
+      let headField = 0;
+      const hx = portR.x + head.cx * portR.w;
+      const hy = portR.y + head.cy * portR.h;
+      for (const b of blobs) {
+        if (n >= MAX) break;
+        let life = 1;
+        if (!b.ambient) {
+          const a = b.age / b.life;
+          life = a < 0.12 ? a / 0.12 : 1 - (a - 0.12) / 0.88;
+        }
+        const r = b.r * Math.sqrt(Math.max(0, life)) * inkK;
+        data[n * 4] = b.x * dpr;
+        data[n * 4 + 1] = (H - b.y) * dpr;
+        data[n * 4 + 2] = r * dpr;
+        data[n * 4 + 3] = b.ambient ? 0 : 1;
+        if (!b.ambient) headField += (r * r) / Math.max((b.x - hx) ** 2 + (b.y - hy) ** 2, 1);
+        n++;
+      }
 
       const toGL = (q: R) => [q.x * dpr, (H - q.y - q.h) * dpr, q.w * dpr, q.h * dpr] as const;
       gl.uniform2f(U.res, el.width, el.height);
       gl.uniform4f(U.rect, ...toGL(portR));
       gl.uniform4f(U.frame, ...toGL(frameR));
       const dk = smooth(0.32, 0.5, p);
-      const fc = [lerp(lerp(0.973, 0.74, k1), 0.29, dk), lerp(lerp(0.973, 0.74, k1), 0.31, dk), lerp(lerp(0.953, 0.72, k1), 0.27, dk)];
+      // frame: cream (invisible against the hero) → light grey → dark olive-grey
+      const fc = [lerp(lerp(0.957, 0.74, k1), 0.29, dk), lerp(lerp(0.957, 0.74, k1), 0.31, dk), lerp(lerp(0.929, 0.72, k1), 0.27, dk)];
       gl.uniform3f(U.frameCol, fc[0], fc[1], fc[2]);
       gl.uniform1f(U.frameA, k1);
       gl.uniform1f(U.dark, dk);
       gl.uniform1f(U.ink, inkK);
-      gl.uniform1f(U.bgA, 1 - smooth(0, 0.28, p));
+      gl.uniform4fv(U.blobs, data);
+      gl.uniform1i(U.count, n);
       gl.uniform1f(U.time, t);
-      gl.uniform2f(U.mouse, eased.x, eased.y);
-      gl.uniform1f(U.pace, eased.pace * 4);
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-      const on = overHead && inkK > 0.5;
+      const on = headField > 1 && inkK > 0.5;
       if (on !== altOn) {
         altOn = on;
         onAltRef.current?.(on);
@@ -248,8 +266,6 @@ export default function FluidHero({ src, altSrc, imageAspect, head, progress, cl
 
     return () => {
       cancelAnimationFrame(raf);
-      clearTimeout(firstIdle);
-      clearTimeout(moveTimer);
       ro.disconnect();
       io.disconnect();
       window.removeEventListener("pointermove", onMove);
@@ -277,63 +293,25 @@ void main() { gl_Position = vec4(aPos, 0.0, 1.0); }`;
 const FRAG = `
 precision highp float;
 uniform vec2 uRes;
-uniform vec4 uRect;
-uniform vec4 uFrame;
+uniform vec4 uRect;   // portrait rect (device px, origin bottom-left): x, y, w, h
+uniform vec4 uFrame;  // clipping frame
 uniform vec3 uFrameCol;
-uniform float uFrameA, uDark, uInk, uBgA, uTime, uPace;
-uniform vec2 uMouse;
-uniform sampler2D uBase, uAlt, uVel;
-uniform bool uHasAlt, uHasVel;
+uniform float uFrameA;
+uniform float uDark;
+uniform float uInk;
+uniform vec4 uBlobs[${MAX}];
+uniform int uCount;
+uniform float uTime;
+uniform sampler2D uBase;
+uniform sampler2D uAlt;
+uniform bool uHasAlt;
 
-// palette
-const vec3 BG = vec3(0.973, 0.973, 0.953);        // #F8F8F3
-const vec3 LINE = vec3(0.796, 0.796, 0.725);      // #CBCBB9
-const vec3 INK_A = vec3(0.910, 0.910, 0.875);     // #E8E8DF
-const vec3 INK_B = vec3(0.812, 0.824, 0.773);     // #CFD2C5
-
-// 3D simplex noise (Ashima / Stefan Gustavson, MIT)
-vec4 permute(vec4 x) { return mod(((x * 34.0) + 1.0) * x, 289.0); }
-vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-float snoise(vec3 v) {
-  const vec2 C = vec2(1.0 / 6.0, 1.0 / 3.0);
-  const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
-  vec3 i = floor(v + dot(v, C.yyy));
-  vec3 x0 = v - i + dot(i, C.xxx);
-  vec3 g = step(x0.yzx, x0.xyz);
-  vec3 l = 1.0 - g;
-  vec3 i1 = min(g.xyz, l.zxy);
-  vec3 i2 = max(g.xyz, l.zxy);
-  vec3 x1 = x0 - i1 + C.xxx;
-  vec3 x2 = x0 - i2 + 2.0 * C.xxx;
-  vec3 x3 = x0 - 1.0 + 3.0 * C.xxx;
-  i = mod(i, 289.0);
-  vec4 p = permute(permute(permute(i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0)) + i.x + vec4(0.0, i1.x, i2.x, 1.0));
-  float n_ = 1.0 / 7.0;
-  vec3 ns = n_ * D.wyz - D.xzx;
-  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-  vec4 x_ = floor(j * ns.z);
-  vec4 y_ = floor(j - 7.0 * x_);
-  vec4 x = x_ * ns.x + ns.yyyy;
-  vec4 y = y_ * ns.x + ns.yyyy;
-  vec4 h = 1.0 - abs(x) - abs(y);
-  vec4 b0 = vec4(x.xy, y.xy);
-  vec4 b1 = vec4(x.zw, y.zw);
-  vec4 s0 = floor(b0) * 2.0 + 1.0;
-  vec4 s1 = floor(b1) * 2.0 + 1.0;
-  vec4 sh = -step(h, vec4(0.0));
-  vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
-  vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
-  vec3 p0 = vec3(a0.xy, h.x);
-  vec3 p1 = vec3(a0.zw, h.y);
-  vec3 p2 = vec3(a1.xy, h.z);
-  vec3 p3 = vec3(a1.zw, h.w);
-  vec4 norm = taylorInvSqrt(vec4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
-  p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-  vec4 m = max(0.6 - vec4(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), 0.0);
-  m = m * m;
-  return 42.0 * dot(m * m, vec4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
+float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float noise(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1, 0)), u.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), u.x), u.y);
 }
-
 vec4 img(sampler2D t, vec2 uv) {
   if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) return vec4(0.0);
   return texture2D(t, uv);
@@ -341,48 +319,41 @@ vec4 img(sampler2D t, vec2 uv) {
 
 void main() {
   vec2 p = gl_FragCoord.xy;
-  vec2 vUv = p / uRes;
-  float aspect = uRes.x / uRes.y;
+  float s = uRes.y / 900.0;
 
-  // ---- drifting contour field ----
-  vec2 uv = vUv; uv.x *= aspect;
-  vec2 m = uMouse * 0.5 + 0.5; m.x *= aspect;
-  float cursor = clamp((1.0 - distance(m, uv) * 3.0) * uPace, -0.75, 1.0);
-  float distort = 0.5 + snoise(vec3(uv, uTime * 0.01)) * 0.5;
-  float v = (0.5 + snoise(vec3(uv + cursor * 0.15 + distort * 0.5, uTime * 0.1)) * 0.5) * 3.0;
-  float band = step(0.5, fract(v));
-  float edge = 0.0;
-#ifdef HAS_DERIV
-  float e2 = v * 2.0;
-  float fw = fwidth(e2);
-  edge = 1.0 - smoothstep(0.0, fw * 1.3, abs(fract(e2 + 0.5) - 0.5));
-#endif
-  vec3 bg = mix(BG, LINE, edge);
-  vec3 inkBg = mix(mix(INK_A, INK_B, band), INK_A, edge);
-
-  // ---- fluid mask (hard edged) ----
-  float fx = 0.0;
-  if (uHasVel) {
-    vec2 vel = texture2D(uVel, vec2(0.025 + vUv.x * 0.95, 0.025 + vUv.y * 0.95)).xy;
-    float len = length(vel);
-    float r = mix(1.0, vel.x * 0.5 + 0.5, len);
-    fx = step(0.1, 1.0 - r) * uInk;
+  // liquid ink field (metaballs with a quickly churning edge)
+  vec2 w = vec2(noise(p / (90.0 * s) + uTime * 0.9), noise(p / (90.0 * s) - uTime * 0.8 + 7.3)) - 0.5;
+  vec2 q = p + w * 26.0 * s;
+  float fieldAll = 0.0, fieldAlt = 0.0;
+  for (int i = 0; i < ${MAX}; i++) {
+    if (i >= uCount) break;
+    vec4 b = uBlobs[i];
+    vec2 d = q - b.xy;
+    float v = (b.z * b.z) / max(dot(d, d), 1.0);
+    fieldAll += v;
+    fieldAlt += v * b.w;
   }
-  bg = mix(bg, inkBg, fx);
-  vec4 col = vec4(bg, uBgA);
+  float inkAll = smoothstep(0.97, 1.03, fieldAll);
+  float inkAlt = smoothstep(0.97, 1.03, fieldAlt);
 
-  // ---- frame + portrait ----
+  vec4 col = vec4(0.86, 0.865, 0.83, 0.42 * inkAll * uInk);
+
+  // frame (clips the portrait once it starts shrinking)
   bool inFrame = p.x >= uFrame.x && p.x <= uFrame.x + uFrame.z && p.y >= uFrame.y && p.y <= uFrame.y + uFrame.w;
   if (inFrame && uFrameA > 0.0) {
     col.rgb = mix(col.rgb, uFrameCol, uFrameA);
     col.a = max(col.a, uFrameA);
   }
-  vec2 puv = (p - uRect.xy) / uRect.zw;
-  vec4 base = img(uBase, puv);
-  vec4 alt = uHasAlt ? img(uAlt, puv) : base;
-  vec4 face = mix(base, alt, fx * alt.a);
-  face.a *= smoothstep(0.0, 0.015, puv.y);
+
+  vec2 uv = (p - uRect.xy) / uRect.zw;
+  vec4 base = img(uBase, uv);
+  vec4 alt = uHasAlt ? img(uAlt, uv) : base;
+  vec4 face = mix(base, alt, inkAlt * uInk);
+  // soften the photo's cropped side/bottom edges
+  float edge = smoothstep(0.0, 0.015, uv.y);
+  face.a *= edge;
   if (!inFrame) face.a = 0.0;
+  // darken + desaturate for the signature moment
   float g = dot(face.rgb, vec3(0.299, 0.587, 0.114));
   face.rgb = mix(face.rgb, vec3(g) * vec3(0.78, 0.8, 0.72), uDark * 0.9);
 
@@ -412,22 +383,21 @@ function createProgram(gl: WebGLRenderingContext, vs: string, fs: string) {
   return gl.getProgramParameter(pr, gl.LINK_STATUS) ? pr : null;
 }
 
-function loadTexture(gl: WebGLRenderingContext, url: string) {
-  return new Promise<WebGLTexture>((resolve, reject) => {
+function loadTexture(gl: WebGLRenderingContext, url: string, unit: number) {
+  return new Promise<void>((resolve, reject) => {
     const im = new Image();
     im.decoding = "async";
     im.onload = () => {
-      const tex = gl.createTexture()!;
-      gl.activeTexture(gl.TEXTURE0);
+      const tex = gl.createTexture();
+      gl.activeTexture(gl.TEXTURE0 + unit);
       gl.bindTexture(gl.TEXTURE_2D, tex);
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
-      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      resolve(tex);
+      resolve();
     };
     im.onerror = reject;
     im.src = url;
