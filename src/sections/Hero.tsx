@@ -31,7 +31,7 @@ export default function Hero() {
   });
 
   const bg = useTransform(p, [0, 0.28], ["#f4f4ed", "#282c20"]);
-  const topo = useTransform(p, [0, 0.2, 0.3], [0, 0, 0.1]); // the hero draws its own contours on the canvas
+  const topo = useTransform(p, [0, 0.28], [0.9, 0.1]);
   const uiFade = useTransform(p, [0, 0.1], [1, 0]);
   const uiEvents = useTransform(p, (v) => (v < 0.08 ? "auto" : "none"));
   const linesOpacity = useTransform(p, [0.14, 0.3], [0, 1]);
